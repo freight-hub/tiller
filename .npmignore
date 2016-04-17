@@ -8,3 +8,4 @@ typings/
 tsd.json
 tsconfig.json
 .idea
+npm-debug.log
