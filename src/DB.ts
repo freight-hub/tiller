@@ -18,8 +18,8 @@ export class _DB {
         }
     }
 
-    async disconnect() {
-        this.db.close();
+    async disconnect(force?:boolean) {
+        await this.db.close(force);
     }
 
     isConnected() {

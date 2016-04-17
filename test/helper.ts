@@ -11,7 +11,7 @@ export function includeHelper() {
         await DB.disconnect();
     }
 
-    async function cleanDatabase() {
+    function cleanDatabase() {
         var databaseCleaner = new DatabaseCleaner('mongodb');
         return new Promise((resolve) => {
             databaseCleaner.clean(DB.db, () => {
@@ -34,8 +34,7 @@ export function includeHelper() {
     })
 
     after(async () => {
-        await cleanDatabase()
-        await disconnect();
+        
     })
 }
 

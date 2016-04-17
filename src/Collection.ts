@@ -32,7 +32,7 @@ export abstract class Collection extends Document {
         return pmap<any, Type>(docs, doc => rebuildInstance(type, doc));
     }
 
-    static async all<Type extends Collection>(type:Function):Promise<Array<Type>> {
+    static async all<Type extends Collection>():Promise<Array<Type>> {
         return (await this.find<Type>({}));
     }
 

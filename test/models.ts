@@ -79,3 +79,88 @@ export class Folder extends Collection {
         return '/' + this.name;
     }
 }
+
+@document()
+export class Item {
+    name:string
+
+    constructor(name:string) {
+        this.name = name;
+    }
+}
+
+@document()
+export class Loc {
+    latitude:number
+    longitude:number
+
+    constructor(longitude:number, latitude:number) {
+        this.latitude = latitude;
+        this.longitude = longitude;
+    }
+
+    _serialize(location:Loc):any {
+        return {
+            type: 'Point',
+            coordinates: [location.longitude, location.latitude]
+        }
+    }
+
+    _deserialize(doc) {
+        return doc ? {
+            latitude: doc.coordinates[1],
+            longitude: doc.coordinates[0]
+        } : null;
+    }
+}
+
+@collection()
+export class Bundle extends Collection {
+    id:number
+
+    @embed(Item)
+    items:Array<Item>
+
+    @embed(Loc)
+    locations:Array<Loc>
+
+    constructor(id:number, items?:Array<Item>, locations?:Array<Loc>) {
+        super();
+        this.id = id;
+        this.items = items;
+        this.locations = locations;
+    }
+
+    foo() {
+        return this.id;
+    }
+}
+
+@collection()
+export class SpaceShip extends Collection {
+    @reference(Bundle)
+    bundles:Array<Bundle>
+
+    constructor(bundles:Array<Bundle>) {
+        super();
+        this.bundles = bundles;
+    }
+}
+
+@collection()
+export class Foo extends Collection {
+    s1:string
+    s2:string
+    n1:number
+
+    constructor(s1:string, s2:string, n1:number) {
+        super()
+        this.s1 = s1;
+        this.s2 = s2;
+        this.n1 = n1;
+    }
+
+    hello() {
+        return 'hello';
+    }
+}
