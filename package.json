@@ -1,0 +1,23 @@
+{
+  "name": "tiller",
+  "version": "0.1.0",
+  "description": "MongoDB ODM for TypeScript",
+  "main": "lib/index.js",
+  "typings": "lib/index",
+  "files": [
+    "lib/"
+  ],
+  "author": "Erik Muttersbach",
+  "license": "ISC",
+  "dependencies": {
+    "assert": "^1.3.0",
+    "lodash": "^4.11.1",
+    "mongodb": "^2.1.16",
+    "source-map-support": "^0.4.0"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "database-cleaner": "^0.13.0",
+    "mocha": "^2.4.5"
+  }
+}
