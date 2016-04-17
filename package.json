@@ -2,10 +2,14 @@
   "name": "tiller",
   "version": "0.1.0",
   "description": "MongoDB ODM for TypeScript",
-  "main": "lib/index.js",
-  "typings": "lib/index",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/erikmuttersbach/tiller.git/"
+  },
+  "main": "lib/src/index.js",
+  "typings": "lib/src/index",
   "files": [
-    "lib/"
+    "lib/src/"
   ],
   "author": "Erik Muttersbach",
   "license": "MIT",
