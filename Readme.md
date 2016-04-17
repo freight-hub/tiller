@@ -61,7 +61,7 @@ Make sure that you compile to ES6 JavaScript.
         console.error(e.stack)
     })
 
-## Manal
+## Manual
 ### Collections
 Making a JS class being stored as MongoDB collection is as easy as adding the `@collection()` decorator and
 inheriting from `Collection`:
@@ -96,5 +96,6 @@ The API to interact with the database is heavily inspired by ActiveRecord:
 * Implement validations
 * Implement `delete()`
 * Add Continous Integration build
+* Complete Readme: References, Embedded Documents
 
 
