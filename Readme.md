@@ -95,5 +95,6 @@ The API to interact with the database is heavily inspired by ActiveRecord:
 * Implement batch operations
 * Implement validations
 * Implement `delete()`
+* Add Continous Integration build
 
 

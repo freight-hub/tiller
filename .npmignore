@@ -1,0 +1,10 @@
+lib/test/
+node_modules/
+src/
+test/
+typings/
+.git
+.gitignore
+tsd.json
+tsconfig.json
+.idea
