@@ -2,6 +2,7 @@ import {expect} from 'chai'
 import {User, Folder, Backups, File, Foo, Bundle, Item} from "./models";
 import {includeHelper} from './helper'
 import {DB} from '../src/DB';
+import {Collection,collection} from '../src/index';
 
 includeHelper();
 
@@ -23,8 +24,22 @@ describe('Collection', () => {
     })
 
     describe('#save()', () => {
-        it('can save a model with a non-ObjectId id', () => {
-            // TODO Implement
+        it('can save a model with a string id', async () => {
+            @collection('coll1')
+            class StringIdColl extends Collection {
+                _id:string
+            }
+
+            let obj = new StringIdColl();
+            obj._id = 'myid1';
+            await obj.save();
+
+            expect(obj.isNew()).to.be.false
+            expect(obj._id).to.eq('myid1');
+
+            let coll = await DB.collection('coll1');
+            let obj_ = (await (await DB.collection('coll1')).find({_id: obj._id}).toArray())[0];
+            expect(obj_._id).to.eq('myid1')
         })
 
         it('saves a document properly to the database if it\'s new', async() => {

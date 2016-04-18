@@ -3,6 +3,7 @@ import {pmap} from "./common/array";
 import {rebuildInstance} from "./core";
 import {Document} from "./Document";
 import * as mongodb from 'mongodb';
+import {InsertOneWriteOpResult} from "mongodb";
 
 export abstract class Collection extends Document {
     _id:any
@@ -46,46 +47,30 @@ export abstract class Collection extends Document {
         return !this._id;
     }
 
-    save(upsert?:boolean) {
-        var self = this;
-        return new Promise((resolve, reject) => {
-            let collectionName = (<any>this)._collectionName;
-            if (!collectionName) {
-                throw new Error(this.constructor.name + ' does not seem to be a collection');
-            }
-            let collection = DB.collection(collectionName).then((coll) => {
-                this._toDb().then((doc) => {
-                    if (this.isNew()) {
-                        coll.insertOne(doc, (err:Error, result:any) => {
-                            if (err) {
-                                return reject(err);
-                            }
-                            //self.__isNew = false;
-                            self._id = result.insertedId;
-                            resolve(self);
-                        })
-                    } else {
-                        coll.updateOne({_id: this._id}, doc, {upsert: upsert}, (err:Error, result:any) => {
-                            if (err) {
-                                return reject(err);
-                            }
-                            resolve(self);
-                        })
-                    }
-                }).catch(reject)
-            }).catch(reject)
-        })
-    }
+    async save() {
+        let collectionName = (<any>this)._collectionName;
+        if (!collectionName) {
+            throw new Error(this.constructor.name + ' does not seem to be a collection');
+        }
 
-    async upsert() {
-        await this.save(true);
+        let coll = await DB.collection(collectionName)
+        let doc = await this._toDb()
+        if (!this._id) {
+            let result:InsertOneWriteOpResult = await coll.insertOne(doc)
+            this._id = result.insertedId;
+        } else {
+            await coll.updateOne({_id: this._id}, doc, {upsert: true});
+        }
+
+        return this;
     }
 
     _collectionName():string {
         return (<any>this)._collectionName;
     }
 
-    async _collection():Promise<mongodb.Collection> {
+    async
+    _collection():Promise < mongodb.Collection > {
         return DB.collection(this._collectionName());
     }
 }
