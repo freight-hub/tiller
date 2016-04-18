@@ -39,12 +39,6 @@ export abstract class Collection extends Document {
 
     constructor() {
         super();
-        //this.__isNew = true;
-    }
-
-    isNew():boolean {
-        //return this.__isNew;
-        return !this._id;
     }
 
     async save() {

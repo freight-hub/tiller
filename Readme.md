@@ -87,6 +87,14 @@ The API to interact with the database is heavily inspired by ActiveRecord:
 
     myModel.save()
 
+#### Using non-ObjectId `_ids`
+You can use non-ObjectId types for `_id` by redefining `_id`:
+
+    @collection()
+    export class MyModel extends Collection {
+        _id:string
+    }
+
 
 ## Roadmap
 * Implement lazy loading
