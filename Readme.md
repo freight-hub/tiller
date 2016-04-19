@@ -87,6 +87,18 @@ The API to interact with the database is heavily inspired by ActiveRecord:
 
     myModel.save()
 
+#### `Collection` instance states
+Using the functions `isNew()` and `isSaved()` you can find out whether an instance of `Collection` has been saved
+in the database already:
+
+    let obj = new MyModel()
+    assert(!obj.isSaved() && obj.isNew())
+    await obj.save()
+    assert(obj.isSaved() && !obj.isNew())
+
+
+
+
 #### Using non-ObjectId `_ids`
 You can use non-ObjectId types for `_id` by redefining `_id`:
 
