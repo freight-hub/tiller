@@ -7,6 +7,7 @@ import {InsertOneWriteOpResult} from "mongodb";
 
 export abstract class Collection extends Document {
     _id:any
+    __isSaved:boolean
 
     static _collectionName:string;
     static __type:Function;
@@ -39,6 +40,7 @@ export abstract class Collection extends Document {
 
     constructor() {
         super();
+        this.__isSaved = false;
     }
 
     async save() {
@@ -56,7 +58,16 @@ export abstract class Collection extends Document {
             await coll.updateOne({_id: this._id}, doc, {upsert: true});
         }
 
+        this.__isSaved = true;
         return this;
+    }
+
+    isNew() {
+        return !this.__isSaved;
+    }
+
+    isSaved() {
+        return this.__isSaved;
     }
 
     _collectionName():string {
