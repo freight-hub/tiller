@@ -12,6 +12,11 @@ export abstract class Collection extends Document {
     static _collectionName:string;
     static __type:Function;
 
+    constructor() {
+        super();
+        this.__isSaved = false;
+    }
+
     static async get<Type extends Collection>(_id:any):Promise<Type> {
         return this.findOne<Type>({_id: _id});
     }
@@ -24,7 +29,7 @@ export abstract class Collection extends Document {
         let type = this.__type || (this._collectionName ? this : null);
         let coll = await DB.collection((<any>type)._collectionName);
         let cursor = coll.find(selector);
-        if (limit !== undefined) {
+        if (typeof(limit) == 'number') {
             cursor = cursor.limit(limit);
         }
         if (sort) {
@@ -36,11 +41,6 @@ export abstract class Collection extends Document {
 
     static async all<Type extends Collection>():Promise<Array<Type>> {
         return (await this.find<Type>({}));
-    }
-
-    constructor() {
-        super();
-        this.__isSaved = false;
     }
 
     async save() {

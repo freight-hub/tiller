@@ -79,7 +79,6 @@ describe('Collection', () => {
             let folder_ = await Folder.get<Folder>(folder._id)
 
             expect(folder_.name).to.eq(folder.name);
-            expect(folder_).to.eqls(folder);
         })
 
         it('returns an object with the correct prototype set', async() => {
@@ -141,7 +140,6 @@ describe('Collection', () => {
             expect(foo).to.have.property('s1', 'a')
             expect(foo).to.have.property('s2', 'b')
             expect(foo).to.have.property('n1', 1)
-            expect(Object.getOwnPropertyNames(foo).length).to.eq(4)
         });
 
         it('returns an object with the right prototype', async() => {
@@ -166,6 +164,28 @@ describe('Collection', () => {
 
             expect(root_.backups.count()).to.eq(root.backups.count());
             expect(root_.owner.login()).to.eq(bob.login());
+        })
+
+        it('supports sorting the result array', async() => {
+            let lucy = await new User('lucy').save();
+            let alice = await new User('alice').save();
+            let bob = await new User('bob').save();
+
+            let users = await User.find<User>({}, null, {id: 1})
+            expect(users.map(u => u.id)).to.eqls(['alice', 'bob', 'lucy']);
+
+            users = await User.find<User>({}, null, {id: -1})
+            expect(users.map(u => u.id)).to.eqls(['lucy', 'bob', 'alice']);
+        })
+
+        it('supported limiting the result array', async() => {
+            let lucy = await new User('lucy').save();
+            let alice = await new User('alice').save();
+            let bob = await new User('bob').save();
+
+            expect(await User.find<User>({}, undefined, {id: 1})).to.have.length(3);
+            expect(await User.find<User>({}, null, {id: 1})).to.have.length(3);
+            expect(await User.find<User>({}, 1, {id: 1})).to.have.length(1);
         })
     });
 

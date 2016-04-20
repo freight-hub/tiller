@@ -3,6 +3,7 @@ import {reference} from "../src/decorators/reference";
 import {document} from "../src/decorators/document";
 import {collection} from "../src/decorators/collection";
 import {embed} from "../src/decorators/embed";
+import {ordered} from "../src/decorators/ordered";
 
 @collection()
 export class User extends Collection {
@@ -28,7 +29,7 @@ export class File extends Collection {
     @reference(User)
     editors:Array<User>
 
-    constructor(name:string, owner:User) {
+    constructor(name:string, owner?:User) {
         super();
         this.name = name;
         this.owner = owner;
@@ -66,7 +67,7 @@ export class Folder extends Collection {
     @reference(File)
     subfolders:Array<Folder>
 
-    @reference(File)
+    @reference(File) @ordered({name: 1})
     files:Array<File>
 
     constructor(name?:string, owner?:User) {
@@ -163,4 +164,9 @@ export class Foo extends Collection {
     hello() {
         return 'hello';
     }
+}
+
+@collection('weird_collection')
+export class WeirdCollectionClazz extends Collection {
+
 }

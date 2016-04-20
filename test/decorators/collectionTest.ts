@@ -1,5 +1,5 @@
 import {expect} from 'chai'
-import {Folder} from "../models";
+import {Folder, WeirdCollectionClazz} from "../models";
 import {includeHelper} from '../helper'
 import {DB} from "../../src/DB";
 import {collection, Collection} from "../../src/index";
@@ -16,11 +16,6 @@ describe('@collection decorator', () => {
     })
 
     it('can use a specified collection name instead of the default derived one', async () => {
-        @collection('weird_collection')
-        class WeirdCollectionClazz extends Collection {
-
-        }
-
         await new WeirdCollectionClazz().save();
 
         let collections = await DB.db.collections();
