@@ -62,7 +62,7 @@ Make sure that you compile to ES6 JavaScript.
     })
 
 ## Manual
-### Collections
+### Creating Collections
 Making a JS class being stored as MongoDB collection is as easy as adding the `@collection()` decorator and
 inheriting from `Collection`:
 
@@ -96,9 +96,6 @@ in the database already:
     await obj.save()
     assert(obj.isSaved() && !obj.isNew())
 
-
-
-
 #### Using non-ObjectId `_ids`
 You can use non-ObjectId types for `_id` by redefining `_id`:
 
@@ -106,6 +103,40 @@ You can use non-ObjectId types for `_id` by redefining `_id`:
     export class MyModel extends Collection {
         _id:string
     }
+
+### Finding Objects
+
+#### `Collection#get()`
+
+Using `Collection#get()` you can fetch a single object using its `_id` value. You have to use `ObjectID`
+if you use standard `_id` values:
+
+    obj = await MyModel.get<MyModel>(new ObjectID("56f90cf44c57a9c97f1ac295"))
+
+    // or using numeric _id's
+    obj = await ModelWithStandardId.get<ModelWithStandardId>(123)
+
+#### `Collection#find()`
+
+The static method `#find(selector:any, limit?:number, sort?:any)` will return an array of objects that
+match `selector`. Optionally you can specify a limit (or set this parameter to `null`) and a sort order.
+
+    // Finding all objects with key == 'value'
+    objs = await MyModel.find<MyModel>({key: 'value'})
+
+    // Limiting the returned objects to 3
+    objs = await MyModel.find<MyModel>({key: 'value'}, 3)
+
+    // Sorting the returned objects to id, not limiting the returned objects
+    objs = await MyModel.find<MyModel>({key: 'value'}, null, {id: 1})
+
+Of course `#find()` doesn't just return `Objects`. It rebuilds entire object hierarchies, and sets the
+correct object prototypes.
+
+#### `Collection#findOne()`
+
+`Collection#findOne(selector)` is similar to `Collection#find()`, but it returns only the first found
+document.
 
 
 ## Roadmap
