@@ -22,6 +22,8 @@
     "./test/decorators/collectionTest.ts",
     "./test/decorators/referenceTest.ts",
     "./test/decorators/embedTest.ts",
-    "./test/decorators/orderedTest.ts"
+    "./test/decorators/orderedTest.ts",
+    "./test/decorators/validateTest.ts",
+    "./test/decorators/indexTest.ts"
   ]
 }

@@ -1,7 +1,8 @@
 import {MongoClient, Db, Collection} from "mongodb";
 import {MongoClientOptions} from "mongodb";
+import {EventEmitter} from "events";
 
-export class _DB {
+export class _DB extends EventEmitter {
     db:Db
     dbName:string
 
@@ -9,17 +10,19 @@ export class _DB {
         this.dbName = dbName;
 
         if (this.db) {
-            Promise.resolve(this.db);
+            // Already connected
         } else {
             let url = 'mongodb://localhost:27017/' + this.dbName;
             
             let options:MongoClientOptions = {server: {socketOptions: {autoReconnect: true}}};
             this.db = await MongoClient.connect(url, options)
+            this.emit('connected');
         }
     }
 
     async disconnect(force?:boolean) {
         await this.db.close(force);
+        this.db = null;
     }
 
     isConnected() {

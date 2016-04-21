@@ -2,6 +2,8 @@ import {Collection} from "./Collection";
 import * as _ from 'lodash';
 import {isArray} from "./common/array";
 import {Document} from "./Document";
+import {DB} from "./DB";
+import {EventEmitter} from "events";
 let assert = require('assert');
 
 export async function rebuildInstance<Type extends Collection>(type:Function, doc:any, dontDeserialize?:boolean):Promise<Type> {
@@ -24,7 +26,7 @@ export async function rebuildInstance<Type extends Collection>(type:Function, do
             let targetType:any = __documents[typeName]['references'][key];
             if (isArray(doc[key])) {
                 let order = __documents[typeName]['ordered'][key];
-                doc[key] = await targetType.find({_id: {$in: doc[key]}}, null,  order ? order : null);
+                doc[key] = await targetType.find({_id: {$in: doc[key]}}, null, order ? order : null);
             } else {
                 doc[key] = await targetType.get(doc[key])
             }
@@ -46,11 +48,18 @@ export async function rebuildInstance<Type extends Collection>(type:Function, do
 
 export function setupDocument(type:Function) {
     if (!type.name) {
-        throw new Error('Type '+type+' cannot be resolved ');
+        throw new Error('Type ' + type + ' cannot be resolved ');
     }
 
     if (!__documents[type.name]) {
-        __documents[type.name] = {references: {}, embeds: {}, type: type, ordered: {}};
+        __documents[type.name] = {
+            references: {},
+            embeds: {},
+            type: type,
+            ordered: {},
+            validate: {},
+            indexes: {}
+        };
     } else {
         if (__documents[type.name].type != type) {
             throw new Error('Type ' + type.name + ' registered twice')
@@ -73,5 +82,14 @@ export function setupDocument(type:Function) {
     }
 }
 
+export function __collections() {
+    var collections = {};
+    for(var prop of Object.getOwnPropertyNames(__documents)) {
+        if(__documents[prop].type._collectionName) {
+            collections[prop] = __documents[prop];
+        }
+    }
+    return collections;
+}
+
 export var __documents = {}
-export var collections = {};

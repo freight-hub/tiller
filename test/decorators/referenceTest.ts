@@ -3,9 +3,9 @@ import {Folder, User, Backups, File, Bundle, SpaceShip} from "../models";
 import {includeHelper} from '../helper'
 import {DB} from "../../src/DB";
 
-includeHelper();
-
 describe('@reference decorator', () => {
+    includeHelper();
+    
     it('saves references to referenced documents', async () => {
         let bob = new User('bob');
         await bob.save();

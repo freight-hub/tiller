@@ -7,9 +7,9 @@ import {DB} from "../src/DB";
 import {embed} from "../src/decorators/embed";
 import {expect} from 'chai'
 
-includeHelper();
-
 describe('Document', () => {
+    includeHelper();
+    
     describe('Transformations', () => {
 
         @document()

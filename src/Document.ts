@@ -1,9 +1,13 @@
 import {__documents} from "./core";
 import {isArray} from "./common/array";
 import {Collection} from "./Collection";
+import {ValidateOptions} from "./decorators/validate";
 let assert = require('assert');
+let schema = require('js-schema');
 
 export class Document {
+    __schema:any
+
     protected async _toDb():Promise<Object> {
         var copy:any = {};
         let keys = Object.keys(this);
@@ -65,5 +69,35 @@ export class Document {
 
     public _deserialize(doc:any) {
         return doc;
+    }
+
+    async validate() {
+        let validate = __documents[this.constructor.name]['validate'];
+        if(validate) {
+            if(!this.__schema) {
+                var schemaOpts = {};
+                Object.getOwnPropertyNames(validate).forEach(p => {
+                    let validateOptions:ValidateOptions = validate[p];
+                    if(validateOptions.required && !validateOptions.type) {
+                        schemaOpts[p] = undefined;
+                    } else if(validateOptions.required && validateOptions.type) {
+                        schemaOpts[p] = validateOptions.type; 
+                    } else if(!validateOptions.required && !validateOptions.type) {
+
+                    } else if(!validateOptions.required && validateOptions.type) {
+                        schemaOpts[p] = [null, validateOptions.type];
+                    }
+                })
+                this.__schema = schema(schemaOpts);
+            }
+
+            return this.__schema.errors(this);
+        } else {
+            return {};
+        }
+    }
+
+    async isValid():Promise<boolean> {
+        return Object.getOwnPropertyNames(await this.validate()).length == 0;
     }
 }

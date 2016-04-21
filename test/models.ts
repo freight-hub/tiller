@@ -4,6 +4,8 @@ import {document} from "../src/decorators/document";
 import {collection} from "../src/decorators/collection";
 import {embed} from "../src/decorators/embed";
 import {ordered} from "../src/decorators/ordered";
+import {validate} from "../src/decorators/validate";
+import {index} from "../src/decorators/index";
 
 @collection()
 export class User extends Collection {
@@ -169,4 +171,31 @@ export class Foo extends Collection {
 @collection('weird_collection')
 export class WeirdCollectionClazz extends Collection {
 
+}
+
+@document()
+export class Door {
+
+    @index()
+    name:string
+}
+
+@collection()
+export class House extends Collection {
+
+    @index({unique: true})
+    publicId:string
+
+    @validate({required: true, type:String}) @index()
+    name:string
+
+    @embed(Door)
+    doors:Array<Door>
+
+
+    constructor(name:string, publicId:string) {
+        super();
+        this.name = name;
+        this.publicId = publicId;
+    }
 }

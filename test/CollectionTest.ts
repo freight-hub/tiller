@@ -4,9 +4,9 @@ import {includeHelper} from './helper'
 import {DB} from '../src/DB';
 import {Collection,collection} from '../src/index';
 
-includeHelper();
-
 describe('Collection', () => {
+    includeHelper();
+    
     describe('#toDb()', () => {
         it('projects embedded and referenced documents', async() => {
             let bob = new User('bob');

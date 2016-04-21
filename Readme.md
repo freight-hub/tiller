@@ -5,6 +5,7 @@ Capabilities of Tiller include:
 * Modeling entire typed hierarchies through sub-documents or references
 * Ability to include serializers/deserializers to modify the structure of a JSON document in the database
 * Modern `async`/`await` API to evade callback hell
+* Add indexes right in the class definition
 
 ## Installation
     $ npm install tiller --save
@@ -87,6 +88,22 @@ The API to interact with the database is heavily inspired by ActiveRecord:
 
     myModel.save()
 
+#### Adding indexes
+Indexes can easily be added using the `@index` decorator. They
+are also supported on subdocuments:
+
+    @collection()
+    class MyModel extends Collection {
+
+        @index({unique: true})
+        myId:number
+
+        @index()
+        name:string
+    }
+
+Indexes spanning multiple fields are currently not supported.
+
 #### `Collection` instance states
 Using the functions `isNew()` and `isSaved()` you can find out whether an instance of `Collection` has been saved
 in the database already:
@@ -148,5 +165,5 @@ document.
 * Implement `delete()`
 * Add Continous Integration build
 * Complete Readme: References, Embedded Documents
-
+* Keep upward references in @document
 

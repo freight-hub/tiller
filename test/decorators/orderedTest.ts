@@ -3,9 +3,9 @@ import {Folder, User, Backups, File, Bundle, SpaceShip, Item, Loc} from "../mode
 import {includeHelper} from '../helper'
 import {DB} from "../../src/DB";
 
-includeHelper();
-
 describe('@ordered decorator', () => {
+    includeHelper();
+    
     it('can return a referenced collection in order', async () => {
         let folder = new Folder('root');
         folder.files = [

@@ -3,9 +3,9 @@ import {Folder, User, Backups, File, Bundle, SpaceShip, Item, Loc} from "../mode
 import {includeHelper} from '../helper'
 import {DB} from "../../src/DB";
 
-includeHelper();
-
 describe('@embed decorator', () => {
+    includeHelper();
+
     it('saves embedded documents', () => {
         let bob = new User('bob');
         let alice = new User('alice');

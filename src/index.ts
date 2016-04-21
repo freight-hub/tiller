@@ -6,6 +6,8 @@ export * from './decorators/collection'
 export * from './decorators/document'
 export * from './decorators/embed'
 export * from './decorators/reference'
+export * from './decorators/ordered'
+export * from './decorators/validate'
 
 export namespace Tiller {
 

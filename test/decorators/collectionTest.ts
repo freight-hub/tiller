@@ -4,9 +4,9 @@ import {includeHelper} from '../helper'
 import {DB} from "../../src/DB";
 import {collection, Collection} from "../../src/index";
 
-includeHelper();
-
 describe('@collection decorator', () => {
+    includeHelper();
+    
     it('resolves the correct collection name', async () => {
         let folder = new Folder();
         await folder.save();

@@ -74,8 +74,7 @@ export abstract class Collection extends Document {
         return (<any>this)._collectionName;
     }
 
-    async
-    _collection():Promise < mongodb.Collection > {
+    async _collection():Promise < mongodb.Collection > {
         return DB.collection(this._collectionName());
     }
 }
