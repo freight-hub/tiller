@@ -156,6 +156,39 @@ correct object prototypes.
 document.
 
 
+### Validating Objects
+Tiller also contains a basic, but extensible, validation layer. Use the
+`@validate` decorator to add a schema to your model:
+
+
+   @collection()
+   export class House extends Collection {
+
+       @validate({required: true})
+       name:string
+
+       @validate({type: ['red', 'white']})
+       color:string
+    }
+
+    house = new House();
+    house.isValid() // false
+
+    house.name = 'My House';
+    house.isValid() // true
+
+    house.color = 'brown';
+    house.isValid() // false
+    house.validate() // {color: ...}
+
+    house.color = 'red';
+    house.isValid() // true
+    house.validate() // {}
+
+
+Refer to [js-schema](https://github.com/molnarg/js-schema) for details about supported types.
+
+
 ## Roadmap
 * Implement lazy loading
 * Remove problems with two documents/collections named equally

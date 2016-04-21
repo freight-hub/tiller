@@ -189,11 +189,16 @@ export class House extends Collection {
     @validate({required: true, type:String}) @index()
     name:string
 
+    @validate({required: false, type: Boolean})
+    dog:boolean
+
     @embed(Door)
     doors:Array<Door>
 
+    @validate({type: ['red', 'white']})
+    color:string
 
-    constructor(name:string, publicId:string) {
+    constructor(name?:string, publicId?:string) {
         super();
         this.name = name;
         this.publicId = publicId;

@@ -51,7 +51,6 @@ DB.on('connected', () => {
     }
 
     Promise.all(promises).then((r) => {
-        //console.log('Indexes created', r);
         DB.emit('indexesCreated', r);
     }).catch((e) => {
         console.error(e.stack);

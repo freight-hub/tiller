@@ -85,13 +85,13 @@ export class Document {
                     } else if(!validateOptions.required && !validateOptions.type) {
 
                     } else if(!validateOptions.required && validateOptions.type) {
-                        schemaOpts[p] = [null, validateOptions.type];
+                        schemaOpts['?'+p] = [validateOptions.type];
                     }
                 })
                 this.__schema = schema(schemaOpts);
             }
 
-            return this.__schema.errors(this);
+            return this.__schema.errors(this) || {};
         } else {
             return {};
         }
