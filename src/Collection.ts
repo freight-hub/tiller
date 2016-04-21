@@ -49,6 +49,8 @@ export abstract class Collection extends Document {
             throw new Error(this.constructor.name + ' does not seem to be a collection');
         }
 
+        await this.beforeSave();
+
         let coll = await DB.collection(collectionName)
         let doc = await this._toDb()
         if (!this._id) {
@@ -57,6 +59,8 @@ export abstract class Collection extends Document {
         } else {
             await coll.updateOne({_id: this._id}, doc, {upsert: true});
         }
+
+        await this.afterSave();
 
         this.__isSaved = true;
         return this;
@@ -76,5 +80,14 @@ export abstract class Collection extends Document {
 
     async _collection():Promise < mongodb.Collection > {
         return DB.collection(this._collectionName());
+    }
+
+    // - Lifecycle Hooks -
+    async beforeSave() {
+
+    }
+
+    async afterSave() {
+
     }
 }

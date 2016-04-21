@@ -6,6 +6,7 @@ Capabilities of Tiller include:
 * Ability to include serializers/deserializers to modify the structure of a JSON document in the database
 * Modern `async`/`await` API to evade callback hell
 * Add indexes right in the class definition
+* Extensible validation layer
 
 ## Installation
     $ npm install tiller --save
@@ -104,7 +105,7 @@ are also supported on subdocuments:
 
 Indexes spanning multiple fields are currently not supported.
 
-#### `Collection` instance states
+#### `Collection` instance states & lifecycle hooks
 Using the functions `isNew()` and `isSaved()` you can find out whether an instance of `Collection` has been saved
 in the database already:
 
@@ -112,6 +113,9 @@ in the database already:
     assert(!obj.isSaved() && obj.isNew())
     await obj.save()
     assert(obj.isSaved() && !obj.isNew())
+
+To perform pre- or post-save actions you can override the `Collection` methods `beforeSave()`
+and `afterSave()`.
 
 #### Using non-ObjectId `_ids`
 You can use non-ObjectId types for `_id` by redefining `_id`:
