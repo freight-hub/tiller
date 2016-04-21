@@ -1,5 +1,5 @@
 import {expect} from 'chai'
-import {User, Folder, Backups, File, Foo, Bundle, Item} from "./models";
+import {User, Folder, Backups, File, Foo, Bundle, Item, Bar} from "./models";
 import {includeHelper} from './helper'
 import {DB} from '../src/DB';
 import {Collection,collection} from '../src/index';
@@ -69,6 +69,16 @@ describe('Collection', () => {
             expect(foo_).to.have.property('n1', 1)
             expect(Object.getOwnPropertyNames(foo_).length).to.eq(Object.getOwnPropertyNames(foo_).length)
         });
+
+        it('saves documents as new, even if the _id is set', async() => {
+            await new Bar(1).save();
+            try {
+                // Saving as new means a new is to be inserted -> will raise an error
+                // because the key already exists
+                await new Bar(1).save();
+                expect.fail()
+            } catch(e) {}
+        })
     })
 
     describe('#get()', () => {

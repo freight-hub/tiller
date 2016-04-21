@@ -204,3 +204,13 @@ export class House extends Collection {
         this.publicId = publicId;
     }
 }
+
+@collection()
+export class Bar extends Collection{
+    _id:number
+
+    constructor(id:number) {
+        super();
+        this._id = id;
+    }
+}

@@ -53,7 +53,7 @@ export abstract class Collection extends Document {
 
         let coll = await DB.collection(collectionName)
         let doc = await this._toDb()
-        if (!this._id) {
+        if (this.isNew()) {
             let result:InsertOneWriteOpResult = await coll.insertOne(doc)
             this._id = result.insertedId;
         } else {
