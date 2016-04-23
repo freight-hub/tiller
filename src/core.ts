@@ -43,6 +43,8 @@ export async function rebuildInstance<Type extends Collection>(type:Function, do
             }
         }
     }
+
+    doc.__isSaved = true;
     return doc;
 }
 

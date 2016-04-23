@@ -14,5 +14,5 @@ export function validate(options:ValidateOptions):any {
 
 export interface ValidateOptions {
     required?:boolean
-    type:Object // TODO Check that this is one of the ten types supported by js-schema
+    type?:Object // TODO Check that this is one of the ten types supported by js-schema
 }

@@ -194,6 +194,7 @@ Refer to [js-schema](https://github.com/molnarg/js-schema) for details about sup
 
 
 ## Roadmap
+* DIRTY Tracking to improve save speed
 * Implement lazy loading
 * Remove problems with two documents/collections named equally
 * Implement `upsert()`
