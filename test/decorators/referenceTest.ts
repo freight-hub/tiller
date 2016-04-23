@@ -19,7 +19,7 @@ describe('@reference decorator', () => {
     it('saves referenced documents to the database if they are new', async () => {
         let bob = new User('bob');
         let root = new Folder('Applications', bob);
-        await root.save();
+        await root.save(true);
 
         expect(bob.isNew()).to.be.false
 
@@ -34,10 +34,10 @@ describe('@reference decorator', () => {
         let rootBackup1 = new File('Applications Backup 1', alice)
         root.backups = new Backups(rootBackup1, null);
 
-        await root.save();
+        await root.save(true);
 
         expect(root.isNew()).to.be.false
-        expect(rootBackup1.isNew()).to.be.false // Because it's a sub document here, not a reference
+        expect(rootBackup1.isNew()).to.be.false
         expect(bob.isNew()).to.be.false
         expect(alice.isNew()).to.be.false
 
@@ -67,7 +67,7 @@ describe('@reference decorator', () => {
         let bundle2 = new Bundle(2);
 
         let ship = new SpaceShip([bundle1, bundle2]);
-        await ship.save();
+        await ship.save(true);
 
         expect(bundle1.isNew()).to.be.false
         expect(bundle2.isNew()).to.be.false
@@ -79,7 +79,7 @@ describe('@reference decorator', () => {
 
     it('returns an object hierarchy with referenced documents in an array', async() => {
         let ship = new SpaceShip([new Bundle(1), new Bundle(2)]);
-        await ship.save();
+        await ship.save(true);
 
         let ship_ = await SpaceShip.get<SpaceShip>(ship._id);
         expect(ship_.bundles.length).to.eq(2);

@@ -4,7 +4,7 @@ import {document} from "../src/decorators/document";
 import {collection} from "../src/decorators/collection";
 import {embed} from "../src/decorators/embed";
 import {ordered} from "../src/decorators/ordered";
-import {validate} from "../src/decorators/validate";
+import {validate, validateDocument, ValidationResult} from "../src/decorators/validate";
 import {index} from "../src/decorators/index";
 
 @collection()
@@ -175,9 +175,21 @@ export class WeirdCollectionClazz extends Collection {
 
 @document()
 export class Door {
-
     @index()
     name:string
+
+    @validate({required: true})
+    locked:boolean
+
+    color:string
+
+    async validate():Promise<ValidationResult> {
+        let v = await validateDocument(this)
+        if(this.color && this.color != 'green') {
+            v.add('color', 'must be green');
+        }
+        return v;
+    }
 }
 
 @collection()

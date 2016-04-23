@@ -1,14 +1,16 @@
 import {__documents} from "./core";
 import {isArray} from "./common/array";
 import {Collection} from "./Collection";
-import {ValidateOptions} from "./decorators/validate";
+import {ValidateOptions, ValidationResult, validateDocument} from "./decorators/validate";
 let assert = require('assert');
-let schema = require('js-schema');
+
+export type HookType = "beforeValidation" | "beforeSave" | "afterSave";
 
 export class Document {
     __schema:any
+    __hooks:{[type:string]: Array<() => Promise<any>>}
 
-    protected async _toDb():Promise<Object> {
+    protected async _toDb(saveDeep?:boolean):Promise<Object> {
         var copy:any = {};
         let keys = Object.keys(this);
         for (var i = 0; i < keys.length; i++) {
@@ -26,18 +28,17 @@ export class Document {
 
             // this[key] holds an object that is a referenced document
             else if (!isArray(this[key]) && __documents[(<any>this).constructor.name] && __documents[(<any>this).constructor.name]['references'][key]) {
-                if (this[key].isNew()) {
-                    await this[key].save();
+                if (saveDeep && this[key].isNew()) {
+                    await this[key].save(saveDeep);
                 }
-                assert(this[key]._id)
                 copy[key] = this[key]._id;
             }
 
             // this[key] is an array, holding referenced documents
             else if (isArray(this[key]) && __documents[(<any>this).constructor.name]['references'][key]) {
                 let p = this[key].map((v:Collection) => {
-                    if (v.isNew()) {
-                        return v.save();
+                    if (saveDeep && v.isNew()) {
+                        return v.save(saveDeep);
                     } else {
                         return Promise.resolve(v);
                     }
@@ -48,12 +49,12 @@ export class Document {
 
             // this[key] holds an object that is an embedded document
             else if (!isArray(this[key]) && __documents[this[key].constructor.name] && __documents[(<any>this).constructor.name]['embeds'][key]) {
-                copy[key] = await this[key]._toDb();
+                copy[key] = await this[key]._toDb(saveDeep);
             }
 
             // this[key] is an array, holding embedded docments
             else if (isArray(this[key]) && __documents[(<any>this).constructor.name]['embeds'][key]) {
-                copy[key] = await Promise.all(this[key].map((v:Document) => v._toDb()));
+                copy[key] = await Promise.all(this[key].map((v:Document) => v._toDb(saveDeep)));
             }
 
             else {
@@ -72,32 +73,26 @@ export class Document {
     }
 
     async validate() {
-        let validate = __documents[this.constructor.name]['validate'];
-        if(validate) {
-            if(!this.__schema) {
-                var schemaOpts = {};
-                Object.getOwnPropertyNames(validate).forEach(p => {
-                    let validateOptions:ValidateOptions = validate[p];
-                    if(validateOptions.required && !validateOptions.type) {
-                        schemaOpts[p] = undefined;
-                    } else if(validateOptions.required && validateOptions.type) {
-                        schemaOpts[p] = validateOptions.type; 
-                    } else if(!validateOptions.required && !validateOptions.type) {
-
-                    } else if(!validateOptions.required && validateOptions.type) {
-                        schemaOpts['?'+p] = [validateOptions.type];
-                    }
-                })
-                this.__schema = schema(schemaOpts);
-            }
-
-            return this.__schema.errors(this) || {};
-        } else {
-            return {};
-        }
+        return validateDocument(this);
     }
 
     async isValid():Promise<boolean> {
-        return Object.getOwnPropertyNames(await this.validate()).length == 0;
+        return (await this.validate()).valid();
+    }
+
+    addHook(type:HookType, hook:() => Promise<any>) {
+        this.__hooks = this.__hooks || {};
+        if(!this.__hooks[type]) {
+            this.__hooks[type] = [];
+        }
+
+        this.__hooks[type].push(hook);
+    }
+
+    async runHooks(type:HookType) {
+        this.__hooks = this.__hooks || {};
+        for(var fn of (this.__hooks[type] || [])) {
+            await fn.bind(this)();
+        }
     }
 }

@@ -13,7 +13,7 @@ describe('@ordered decorator', () => {
             new File('a'),
             new File('b'),
         ]
-        await folder.save();
+        await folder.save(true);
 
         folder = await Folder.get<Folder>(folder._id);
         expect(folder.files.map(f => f.name)).to.eqls(['a', 'b', 'c'])

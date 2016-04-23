@@ -1,7 +1,9 @@
 import {expect} from 'chai'
-import {Folder, User, Backups, File, Bundle, SpaceShip, Item, Loc, House} from "../models";
+import {Folder, User, Backups, File, Bundle, SpaceShip, Item, Loc, House, Door} from "../models";
 import {includeHelper} from '../helper'
 import {DB} from "../../src/DB";
+import {ValidationResult} from "../../src/decorators/validate";
+import {Document} from "../../src/Document";
 
 describe('@validate decorator', () => {
     includeHelper();
@@ -46,19 +48,74 @@ describe('@validate decorator', () => {
             house.color = 'green';
             expect(await house.isValid()).to.be.false
         })
+
+        it('returns false if an embedded document is invalid', async () => {
+            let house = new House('foo');
+            house.doors = [new Door()];
+            expect(await house.isValid()).to.be.false
+        })
     })
 
     describe('#validate', () => {
         it('returns an error message if a required attribute is missing', async() => {
             let house = new House();
             let validation = await house.validate();
-            expect(validation['name']).to.be.exist
+            expect(validation.constructor).to.eq(ValidationResult)
+            expect(validation.errors['name']).to.exist
         })
 
         it('returns true if a required attribute is present', async() => {
             let house = new House('house1');
             let validation = await house.validate();
-            expect(validation).to.be.eqls({})
+            expect(validation.constructor).to.eq(ValidationResult)
+            expect(validation.valid()).to.be.true
+        })
+
+        it('calls custom validation functions', async () => {
+            let house = new House('house1');
+            house.doors = [new Door()]
+            house.doors[0].color = 'blue';
+            let validation = await house.validate();
+            expect(validation.valid()).to.be.false
+
+            house.doors[0].color = 'green';
+            validation = await house.validate();
+            expect(validation.valid()).to.be.false
         })
     });
+    
+    describe('ValidationResult', () => {
+        describe('#valid()', () => {
+            it('returns true if no error messages exist', async () => {
+                expect(new ValidationResult().valid()).to.be.true
+                expect(new ValidationResult({}).valid()).to.be.true
+            })
+
+            it('returns false if errors exist', async () => {
+                expect(new ValidationResult({prop: ['must exist']}).valid()).to.be.false
+            })
+        })
+
+        describe('#add()', () => {
+            it('adds a new error message for a property', async () => {
+                let v = new ValidationResult();
+                v.add('prop', 'is null');
+                expect(v.errors['prop']).to.eqls(['is null']);
+            })
+        })
+
+        describe('#addErrors()', () => {
+            it('adds an errors object of another ValidationResult', async () => {
+                let inner = new ValidationResult({
+                    foo: ['is null']
+                });
+                let outer = new ValidationResult({
+                    foo: ['is also null']
+                });
+                outer.addErrors(inner.errors, 'inner');
+                expect(outer.errors['foo']).to.eqls(['is also null']);
+                expect(outer.errors['inner.foo']).to.eqls(['is null']);
+            })
+        })
+    })
 })

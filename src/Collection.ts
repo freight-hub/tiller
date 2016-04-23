@@ -4,6 +4,7 @@ import {rebuildInstance} from "./core";
 import {Document} from "./Document";
 import * as mongodb from 'mongodb';
 import {InsertOneWriteOpResult} from "mongodb";
+import {ValidationError} from "./decorators/validate";
 
 export abstract class Collection extends Document {
     _id:any
@@ -43,16 +44,21 @@ export abstract class Collection extends Document {
         return (await this.find<Type>({}));
     }
 
-    async save() {
+    async save(deep?:boolean) {
         let collectionName = (<any>this)._collectionName;
         if (!collectionName) {
             throw new Error(this.constructor.name + ' does not seem to be a collection');
         }
 
-        await this.beforeSave();
+        let validation = await this.validate();
+        if(!validation.valid()) {
+            throw new ValidationError(this.constructor.name+(this.isSaved() ? '#'+this._id : '')+' is not valid', validation);
+        }
+
+        await this.runHooks('beforeSave')
 
         let coll = await DB.collection(collectionName)
-        let doc = await this._toDb()
+        let doc = await this._toDb(deep)
         if (this.isNew()) {
             let result:InsertOneWriteOpResult = await coll.insertOne(doc)
             this._id = result.insertedId;
@@ -60,7 +66,7 @@ export abstract class Collection extends Document {
             await coll.updateOne({_id: this._id}, doc, {upsert: true});
         }
 
-        await this.afterSave();
+        await this.runHooks('afterSave')
 
         this.__isSaved = true;
         return this;
@@ -70,6 +76,13 @@ export abstract class Collection extends Document {
         return !this.__isSaved;
     }
 
+    /**
+     * Returns true if this object is persisted in the database,
+     * e.g. save() was called at least once or the object was fetched
+     * from the database.
+     *
+     * @returns {boolean}
+     */
     isSaved() {
         return this.__isSaved;
     }
@@ -80,14 +93,5 @@ export abstract class Collection extends Document {
 
     async _collection():Promise < mongodb.Collection > {
         return DB.collection(this._collectionName());
-    }
-
-    // - Lifecycle Hooks -
-    async beforeSave() {
-
-    }
-
-    async afterSave() {
-
     }
 }

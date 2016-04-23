@@ -1,8 +1,9 @@
 import {expect} from 'chai'
-import {User, Folder, Backups, File, Foo, Bundle, Item, Bar} from "./models";
+import {User, Folder, Backups, File, Foo, Bundle, Item, Bar, House} from "./models";
 import {includeHelper} from './helper'
 import {DB} from '../src/DB';
 import {Collection,collection} from '../src/index';
+import {ValidationError} from '../src/decorators/validate';
 
 describe('Collection', () => {
     includeHelper();
@@ -13,9 +14,10 @@ describe('Collection', () => {
             let alice = new User('alice');
             let root = new Folder('Applications', bob);
             let rootBackup1 = new File('Applications Backup 1', alice)
+            await rootBackup1.save();
             root.backups = new Backups(rootBackup1, null);
 
-            let obj = await (<any>root)._toDb();
+            let obj = await (<any>root)._toDb(true);
             expect(obj).to.have.property('name', 'Applications')
             expect(obj.owner.toString()).to.eq(bob._id.toString());
             expect(obj).to.have.property('backups')
@@ -79,6 +81,15 @@ describe('Collection', () => {
                 expect.fail()
             } catch(e) {}
         })
+
+        it('raises a ValidationError the object is invalid', async () => {
+            try {
+                await new House().save();
+                expect.fail()
+            } catch(e) {
+                expect(e).to.be.an.instanceOf(ValidationError)
+            }
+        })
     })
 
     describe('#get()', () => {
@@ -110,7 +121,7 @@ describe('Collection', () => {
             let bob = new User('bob');
             let root = new Folder('Applications', bob);
             root.backups = new Backups(new File('test', bob));
-            await root.save()
+            await root.save(true)
 
             let bob_ = await User.get<User>(bob._id);
             expect(bob_.login()).to.eq(bob.login())
@@ -164,7 +175,7 @@ describe('Collection', () => {
             let bob = new User('bob');
             let root = new Folder('Applications', bob);
             root.backups = new Backups(new File('test', bob));
-            await root.save();
+            await root.save(true);
 
             let bob_ = await User.get<User>(bob._id);
             expect(bob_.login()).to.eq(bob.login())
@@ -217,7 +228,7 @@ describe('Collection', () => {
         let bob = new User('bob');
         let root = new Folder('Applications', bob);
         root.backups = new Backups(new File('test', bob));
-        await root.save();
+        await root.save(true);
 
         let root_ = await Folder.get<Folder>(root._id);
         let bob_ = await User.get<User>(bob._id);
