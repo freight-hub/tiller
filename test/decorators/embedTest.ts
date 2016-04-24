@@ -24,6 +24,15 @@ describe('@embed decorator', () => {
         expect(bundle_.items).to.eqls([{name: 'Apple'}, {name: 'Banana'}])
     })
 
+    it('saves a document with an array of embedded documents, some being null', async () => {
+        let bundle = new Bundle(1, [new Item('Apple'), new Item('Banana'), null]);
+        await bundle.save();
+
+        let bundle_ = (await (await DB.collection('bundles')).find({_id: bundle._id}).toArray())[0];
+        expect(bundle_.id).to.eq(1)
+        expect(bundle_.items).to.eqls([{name: 'Apple'}, {name: 'Banana'}, null])
+    })
+
     it('saves a document with an array of embedded document set to null', async () => {
         let bundle = new Bundle(1, null);
         await bundle.save();

@@ -8,7 +8,6 @@ export type HookType = "beforeValidation" | "beforeSave" | "afterSave";
 
 export class Document {
     __schema:any
-    __hooks:{[type:string]: Array<() => Promise<any>>}
 
     protected async _toDb(saveDeep?:boolean):Promise<Object> {
         var copy:any = {};
@@ -44,7 +43,7 @@ export class Document {
                     }
                 });
 
-                copy[key] = (await Promise.all(p)).map((v:any) => v._id);
+                copy[key] = (await Promise.all(p)).map((v:any) => v ? v._id : v);
             }
 
             // this[key] holds an object that is an embedded document
@@ -54,7 +53,7 @@ export class Document {
 
             // this[key] is an array, holding embedded docments
             else if (isArray(this[key]) && __documents[(<any>this).constructor.name]['embeds'][key]) {
-                copy[key] = await Promise.all(this[key].map((v:Document) => v._toDb(saveDeep)));
+                copy[key] = await Promise.all(this[key].map((v:Document) => v ? v._toDb(saveDeep) : v));
             }
 
             else {
@@ -80,19 +79,7 @@ export class Document {
         return (await this.validate()).valid();
     }
 
-    addHook(type:HookType, hook:() => Promise<any>) {
-        this.__hooks = this.__hooks || {};
-        if(!this.__hooks[type]) {
-            this.__hooks[type] = [];
-        }
+    async beforeValidation() {
 
-        this.__hooks[type].push(hook);
-    }
-
-    async runHooks(type:HookType) {
-        this.__hooks = this.__hooks || {};
-        for(var fn of (this.__hooks[type] || [])) {
-            await fn.bind(this)();
-        }
     }
 }

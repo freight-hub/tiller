@@ -8,6 +8,9 @@ import {Document} from "../../src/Document";
 describe('@validate decorator', () => {
     includeHelper();
 
+    // TODO Should test required: true for array
+    // TODO Should test for null objects in array -> validation should not fail
+
     describe('#isValid', () => {
         it('returns false if a required attribute is missing', async () => {
             let house = new House();
@@ -83,7 +86,7 @@ describe('@validate decorator', () => {
             expect(validation.valid()).to.be.false
         })
     });
-    
+
     describe('ValidationResult', () => {
         describe('#valid()', () => {
             it('returns true if no error messages exist', async () => {

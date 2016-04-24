@@ -62,6 +62,17 @@ describe('@reference decorator', () => {
             .to.deep.equal([bundle1._id.toString(), bundle2._id.toString()])
     })
 
+    it('saves a document with an array of referenced documents, some being null', async () => {
+        let bundle1 = new Bundle(1);
+        await bundle1.save()
+
+        let ship = new SpaceShip([bundle1, null]);
+        await ship.save();
+
+        let ship_ = (await (await DB.collection('spaceships')).find({_id: ship._id}).toArray())[0];
+        expect([ship_.bundles[0].toString(), null]).to.deep.equal([bundle1._id.toString(), null])
+    })
+
     it('saves a document with an array of referenced documents, which are un-saved', async () => {
         let bundle1 = new Bundle(1);
         let bundle2 = new Bundle(2);

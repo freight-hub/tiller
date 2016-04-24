@@ -69,7 +69,6 @@ export function setupDocument(type:Function) {
     }
 
     type.prototype._toDb = (<any>Document.prototype)._toDb;
-    type.prototype.runHooks = (<any>Document.prototype).runHooks;
 
     if (!type.prototype._serialize) {
         type.prototype._serialize = (<any>Document.prototype)._serialize;

@@ -52,10 +52,10 @@ export abstract class Collection extends Document {
 
         let validation = await this.validate();
         if(!validation.valid()) {
-            throw new ValidationError(this.constructor.name+(this.isSaved() ? '#'+this._id : '')+' is not valid', validation);
+            throw new ValidationError(this.constructor.name+(this.isSaved() ? '#'+this._id : '')+' is not valid: '+validation.toString(), validation);
         }
 
-        await this.runHooks('beforeSave')
+        await this.beforeSave()
 
         let coll = await DB.collection(collectionName)
         let doc = await this._toDb(deep)
@@ -66,7 +66,7 @@ export abstract class Collection extends Document {
             await coll.updateOne({_id: this._id}, doc, {upsert: true});
         }
 
-        await this.runHooks('afterSave')
+        await this.afterSave();
 
         this.__isSaved = true;
         return this;
@@ -93,5 +93,13 @@ export abstract class Collection extends Document {
 
     async _collection():Promise < mongodb.Collection > {
         return DB.collection(this._collectionName());
+    }
+
+    async beforeSave() {
+
+    }
+
+    async afterSave() {
+
     }
 }

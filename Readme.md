@@ -205,3 +205,6 @@ Refer to [js-schema](https://github.com/molnarg/js-schema) for details about sup
 * Complete Readme: References, Embedded Documents
 * Keep upward references in @document
 
+## Issues
+* "Required" validation of references, when we don't deep-save
+

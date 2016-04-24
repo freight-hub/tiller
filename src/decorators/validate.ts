@@ -16,7 +16,9 @@ export function validate(options:ValidateOptions):any {
 }
 
 export async function validateDocument(doc:any):Promise<ValidationResult> {
-    await doc.runHooks('beforeValidation')
+    if(typeof(doc.beforeValidation) == 'function') {
+        await doc.beforeValidation();
+    }
 
     let v = new ValidationResult();
 
@@ -28,8 +30,10 @@ export async function validateDocument(doc:any):Promise<ValidationResult> {
                 v.addErrors(embedValidation.errors, prop);
             } else {
                 for(var el of doc[prop]) {
+                  if(el) {
                     let embedValidation = await el.validate();
                     v.addErrors(embedValidation.errors, prop);
+                  }
                 }
             }
         }
@@ -82,13 +86,21 @@ export class ValidationResult {
     }
 
     addErrors(errors:{[property:string]:Array<string>}, prefix:string) {
-        for(var prop of Object.keys(errors)) {
+        for(var prop of Object.keys(errors || {})) {
             errors[prop].forEach(e => this.add(prefix+'.'+prop, e))
         }
     }
 
     valid() {
         return Object.getOwnPropertyNames(this.errors).length == 0;
+    }
+
+    toString() {
+        let str = [];
+        for(var key of Object.keys(this.errors || {})) {
+            str.push(key+': '+this.errors[key].join(','));
+        }
+        return str.join('\n');
     }
 }
 
