@@ -92,6 +92,41 @@ describe('Collection', () => {
         })
     })
 
+    describe('#save(..., true)', () => {
+        it('upserts existing documents', async () => {
+            let house = new House('My House 1');
+            await house.save();
+
+            house = await House.get<House>(house._id);
+            house.color = 'red';
+            await house.save();
+
+            let _house = await House.get<House>(house._id);
+            expect(_house.name).to.eq('My House 1');
+            expect(_house.color).to.eq('red');
+        })
+
+        it('totally replaces objects when upserting', async () => {
+            let house = new House('My House 1');
+            house.color = 'red';
+            await house.save();
+
+            let _id = house._id;
+            let _house = await House.get<House>(_id);
+            expect(_house.name).to.eq('My House 1');
+            expect(_house.color).to.eq('red');
+
+            // Now upsert, and totally replace
+            house = new House('My House 1 - Updated');
+            house._id = _id;
+            await house.save(true, true);
+
+            _house = await House.get<House>(_id);
+            expect(_house.name).to.eq('My House 1 - Updated');
+            expect(_house.color).to.eq(undefined);
+        })
+    })
+
     describe('#get()', () => {
         it('returns a document if it exists', async () => {
             var folder = new Folder('myfolder');

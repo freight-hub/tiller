@@ -125,6 +125,28 @@ You can use non-ObjectId types for `_id` by redefining `_id`:
         _id:string
     }
 
+### Saving Objects
+#### `#save()`
+Regardless of whether an instance is a new completely new instance, was loaded from a
+database with (`find()` or similar) or an upsert should be performed - the `#save()` method
+will do:
+
+    // Saves a new instance
+    var obj1 = new MyModel()
+    obj1.save()
+
+    // Updates an instance
+    var obj1 = MyModel.get<MyModel>(...)
+    obj1.save()
+
+    // Upsert an instance
+    var obj1 = new MyModel()
+    obj1._id =
+    obj1.save(undefined, true)
+
+#### Saving Referenced Objects
+TODO
+
 ### Finding Objects
 
 #### `Collection#get()`

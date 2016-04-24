@@ -44,7 +44,7 @@ export abstract class Collection extends Document {
         return (await this.find<Type>({}));
     }
 
-    async save(deep?:boolean) {
+    async save(deep?:boolean, upsert?:boolean) {
         let collectionName = (<any>this)._collectionName;
         if (!collectionName) {
             throw new Error(this.constructor.name + ' does not seem to be a collection');
@@ -59,11 +59,11 @@ export abstract class Collection extends Document {
 
         let coll = await DB.collection(collectionName)
         let doc = await this._toDb(deep)
-        if (this.isNew()) {
+        if (this.isNew() && !upsert) {
             let result:InsertOneWriteOpResult = await coll.insertOne(doc)
             this._id = result.insertedId;
         } else {
-            await coll.updateOne({_id: this._id}, doc, {upsert: true});
+            await coll.updateOne({_id: this._id}, doc, {upsert: upsert});
         }
 
         await this.afterSave();
