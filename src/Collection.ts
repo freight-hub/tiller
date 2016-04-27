@@ -44,12 +44,22 @@ export abstract class Collection extends Document {
         return (await this.find<Type>({}));
     }
 
-    async save(deep?:boolean, upsert?:boolean) {
-        let collectionName = (<any>this)._collectionName;
-        if (!collectionName) {
-            throw new Error(this.constructor.name + ' does not seem to be a collection');
-        }
+    static async count(selector?:any):Promise<number> {
+        let type = this.__type || (this._collectionName ? this : null);
+        let coll = await DB.collection((<any>type)._collectionName);
+        let cursor = coll.find(selector || {});
+        return await cursor.count(false);
+    }
 
+    /**
+     * Saves a new model instance or updates an existing one.
+     *
+     * @param deep Whether dependant, i.e. `@reference`'d documents should also be saved
+     * @param upsert Whether an upsert operation should be performed. This is helpful, if this object was created
+     *  with `new`, but the _id already exists in the database.
+     * @returns {Collection}
+     */
+    async save(deep?:boolean, upsert?:boolean) {
         let validation = await this.validate();
         if(!validation.valid()) {
             throw new ValidationError(this.constructor.name+(this.isSaved() ? '#'+this._id : '')+' is not valid: '+validation.toString(), validation);
@@ -57,12 +67,16 @@ export abstract class Collection extends Document {
 
         await this.beforeSave()
 
+        let collectionName = (<any>this)._collectionName;
         let coll = await DB.collection(collectionName)
         let doc = await this._toDb(deep)
         if (this.isNew() && !upsert) {
             let result:InsertOneWriteOpResult = await coll.insertOne(doc)
             this._id = result.insertedId;
         } else {
+            if(!this._id) {
+                throw new Error('To update or upsert a document an _id is required');
+            }
             await coll.updateOne({_id: this._id}, doc, {upsert: upsert});
         }
 
@@ -70,6 +84,31 @@ export abstract class Collection extends Document {
 
         this.__isSaved = true;
         return this;
+    }
+
+    /**
+     * Performs an upsert operation with this model.
+     * Equivalent to `save(deep, true)`;
+     *
+     * @param deep
+     * @returns {Promise<Collection>}
+     */
+    async upsert(deep?:boolean) {
+        return this.save(deep, true);
+    }
+
+    async destroy() {
+        if(!this._id) {
+            throw new Error('Models without an _id cannot be destroyed');
+        }
+
+        await this.beforeDestroy()
+
+        let collectionName = (<any>this)._collectionName;
+        let coll = await DB.collection(collectionName);
+        await coll.deleteOne({_id: this._id});
+
+        await this.afterDestroy()
     }
 
     isNew() {
@@ -100,6 +139,14 @@ export abstract class Collection extends Document {
     }
 
     async afterSave() {
+
+    }
+
+    async beforeDestroy() {
+
+    }
+
+    async afterDestroy() {
 
     }
 }

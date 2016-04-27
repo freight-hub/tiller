@@ -259,6 +259,27 @@ describe('Collection', () => {
         })
     })
 
+    describe('#count()', () => {
+        it('returns the count of documents', async () => {
+            await new User('bob').save();
+            await new User('anne').save();
+            await new User('judith').save();
+
+            expect(await User.count()).to.eq(3);
+            expect(await User.count({id: 'bob'})).to.eq(1);
+            expect(await User.count({id: 'nonono'})).to.eq(0);
+        })
+    })
+
+    describe('#destroy', async () => {
+        it('destroy the instance of an object', async () => {
+            let bob = await new User('bob').save();
+            expect(await User.count()).to.eq(1);
+            await bob.destroy();
+            expect(await User.count()).to.eq(0);
+        })
+    })
+
     it('save() -> find() -> save() -> find() is an idempotent operation chain', async() => {
         let bob = new User('bob');
         let root = new Folder('Applications', bob);

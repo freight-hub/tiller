@@ -181,14 +181,21 @@ correct object prototypes.
 `Collection#findOne(selector)` is similar to `Collection#find()`, but it returns only the first found
 document.
 
+### Deleting Objects
+
+#### `Collection#destroy()`
+An object can be destroyed using the `#destroy()` method:
+
+    await obj.destroy();
+
 
 ### Validating Objects
 Tiller also contains a basic, but extensible, validation layer. Use the
 `@validate` decorator to add a schema to your model:
 
 
-   @collection()
-   export class House extends Collection {
+    @collection()
+    export class House extends Collection {
 
        @validate({required: true})
        name:string
@@ -219,10 +226,7 @@ Refer to [js-schema](https://github.com/molnarg/js-schema) for details about sup
 * DIRTY Tracking to improve save speed
 * Implement lazy loading
 * Remove problems with two documents/collections named equally
-* Implement `upsert()`
 * Implement batch operations
-* Implement validations
-* Implement `delete()`
 * Add Continous Integration build
 * Complete Readme: References, Embedded Documents
 * Keep upward references in @document
