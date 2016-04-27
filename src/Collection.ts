@@ -18,6 +18,11 @@ export abstract class Collection extends Document {
         this.__isSaved = false;
     }
 
+    static async create<Type extends Collection>(obj:any):Promise<Type> {
+        let type = this.__type || (this._collectionName ? this : null);
+        return rebuildInstance<Type>(type, obj);
+    }
+
     static async get<Type extends Collection>(_id:any):Promise<Type> {
         return this.findOne<Type>({_id: _id});
     }
@@ -37,7 +42,11 @@ export abstract class Collection extends Document {
             cursor = cursor.sort(sort);
         }
         let docs = await cursor.toArray();
-        return pmap<any, Type>(docs, doc => rebuildInstance(type, doc));
+        return pmap<any, Type>(docs, async (doc) => {
+            doc = await rebuildInstance(type, doc);
+            doc.__isSaved = true;
+            return doc;
+        });
     }
 
     static async all<Type extends Collection>():Promise<Array<Type>> {
@@ -61,8 +70,8 @@ export abstract class Collection extends Document {
      */
     async save(deep?:boolean, upsert?:boolean) {
         let validation = await this.validate();
-        if(!validation.valid()) {
-            throw new ValidationError(this.constructor.name+(this.isSaved() ? '#'+this._id : '')+' is not valid: '+validation.toString(), validation);
+        if (!validation.valid()) {
+            throw new ValidationError(this.constructor.name + (this.isSaved() ? '#' + this._id : '') + ' is not valid: ' + validation.toString(), validation);
         }
 
         await this.beforeSave()
@@ -74,7 +83,7 @@ export abstract class Collection extends Document {
             let result:InsertOneWriteOpResult = await coll.insertOne(doc)
             this._id = result.insertedId;
         } else {
-            if(!this._id) {
+            if (!this._id) {
                 throw new Error('To update or upsert a document an _id is required');
             }
             await coll.updateOne({_id: this._id}, doc, {upsert: upsert});
@@ -98,7 +107,7 @@ export abstract class Collection extends Document {
     }
 
     async destroy() {
-        if(!this._id) {
+        if (!this._id) {
             throw new Error('Models without an _id cannot be destroyed');
         }
 

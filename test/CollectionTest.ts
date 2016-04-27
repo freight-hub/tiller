@@ -1,5 +1,5 @@
 import {expect} from 'chai'
-import {User, Folder, Backups, File, Foo, Bundle, Item, Bar, House} from "./models";
+import {User, Folder, Backups, File, Foo, Bundle, Item, Bar, House, Door} from "./models";
 import {includeHelper} from './helper'
 import {DB} from '../src/DB';
 import {Collection,collection} from '../src/index';
@@ -24,6 +24,21 @@ describe('Collection', () => {
             expect(obj.backups.backup1.toString()).to.eq(rootBackup1._id.toString())
         })
     })
+
+    describe('#create', () => {
+        it('created object hierarchies from objecta', async () => {
+            let house = await House.create<House>({
+                name: 'foo',
+                doors: [{
+                    name: 'Door 1',
+                    locked: true
+                }]
+            });
+
+            expect(house).to.be.an.instanceOf(House);
+            expect(house.doors[0]).to.be.an.instanceOf(Door);
+        })
+    });
 
     describe('#save()', () => {
         it('can save a model with a string id', async () => {

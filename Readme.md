@@ -222,6 +222,14 @@ Tiller also contains a basic, but extensible, validation layer. Use the
 Refer to [js-schema](https://github.com/molnarg/js-schema) for details about supported types.
 
 
+### Working with Plain old JavaScript `Object`s
+
+To recreate a typed object hierarchy from JSON/JavaScript Objects `Collection.create()` can be used. It will
+also recreate embedded and referenced documents.
+
+    let myModel = MyCollection.create<MyCollection>({foo: 'bar', child: {a: 'b'}})
+
+
 ## Roadmap
 * DIRTY Tracking to improve save speed
 * Implement lazy loading
