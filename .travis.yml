@@ -6,3 +6,4 @@ before_install:
 - tsc
 script:
 - npm test
+services: mongodb
