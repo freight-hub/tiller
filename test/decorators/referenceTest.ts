@@ -1,5 +1,5 @@
 import {expect} from 'chai'
-import {Folder, User, Backups, File, Bundle, SpaceShip} from "../models";
+import {Folder, User, Backups, File, Bundle, SpaceShip, A, B} from "../models";
 import {includeHelper} from '../helper'
 import {DB} from "../../src/DB";
 
@@ -98,5 +98,125 @@ describe('@reference decorator', () => {
         expect(ship_.bundles[0].id).eq(1)
         expect(ship_.bundles[1]).to.be.instanceOf(Bundle)
         expect(ship_.bundles[1].id).eq(2)
+    })
+
+    describe('with a lazy reference', () => {
+        it('saves references to referenced documents', async () => {
+            let b = await new B('My B').save();
+            let a = await new A(b).save();
+            
+            let a_ = (await (await DB.collection('A')).find({_id: a._id}).toArray())[0];
+            expect(a_.b.toString()).to.eq(b._id.toString())
+        })
+
+        it('saves references to referenced documents in an array', async () => {
+            let b1 = await new B('My B1').save();
+            let b2 = await new B('My B2').save();
+            let a = await new A(undefined, [b1, b2]).save();
+
+            let a_ = (await (await DB.collection('A')).find({_id: a._id}).toArray())[0];
+            expect(a_.bs[0].toString()).to.eq(b1._id.toString())
+            expect(a_.bs[1].toString()).to.eq(b2._id.toString())
+        })
+
+        it('returns the id\'s of lazy referenced documents by default', async() => {
+            let b = await new B('My B').save();
+            let a = await new A(b).save();
+
+            let a_ = await A.get<A>(a._id);
+            expect(a_.b.toString()).to.eq(b._id.toString());
+        })
+
+        it('returns the id\'s of lazy referenced documents in an array by default', async() => {
+            let b1 = await new B('My B1').save();
+            let b2 = await new B('My B2').save();
+            let a = await new A(undefined, [b1, b2]).save();
+
+            let a_ = await A.get<A>(a._id);
+            expect(a_.bs[0].toString()).to.eq(b1._id.toString());
+            expect(a_.bs[1].toString()).to.eq(b2._id.toString());
+        })
+
+        it('returns lazy referenced documents when specified', async() => {
+            let b = await new B('My B').save();
+            let a = await new A(b).save();
+
+            let a_ = await A.get<A>(a._id);
+            await a_.loadReference('b');
+            expect(a_.b.constructor).to.eq(B)
+        })
+
+        it('returns lazy referenced documents in an array when specified', async() => {
+            let b1 = await new B('My B1').save();
+            let b2 = await new B('My B2').save();
+            let a = await new A(undefined, [b1, b2]).save();
+
+            let a_ = await A.get<A>(a._id);
+            await a_.loadReference('bs');
+            expect(a_.bs[0].constructor).to.eq(B)
+            expect(a_.bs[1].constructor).to.eq(B)
+            expect(a_.bs[0]._id.toString()).to.eq(b1._id.toString());
+            expect(a_.bs[1]._id.toString()).to.eq(b2._id.toString());
+        })
+
+        it('saving a loaded (only eager) document leaves the document intact in the database', async () => {
+            let b = await new B('My B').save();
+            let a = await new A(b).save();
+
+            let a_ = (await (await DB.collection('A')).find({_id: a._id}).toArray())[0];
+
+            a = await A.get<A>(a._id);
+            await a.save();
+
+            let a_2 = (await (await DB.collection('A')).find({_id: a._id}).toArray())[0];
+            expect(a_._id.toString()).to.eq(a_2._id.toString());
+            expect(a_.b.toString()).to.eq(a_2.b.toString());
+        })
+
+        it('saving a loaded (only eager) document with referenced documents in an array leaves the document intact in the database', async () => {
+            let b1 = await new B('My B1').save();
+            let b2 = await new B('My B2').save();
+            let a = await new A(undefined, [b1, b2]).save();
+
+            let a_ = (await (await DB.collection('A')).find({_id: a._id}).toArray())[0];
+
+            a = await A.get<A>(a._id);
+            await a.save();
+
+            let a_2 = (await (await DB.collection('A')).find({_id: a._id}).toArray())[0];
+            expect(a_.bs[0].toString()).to.eq(a_2.bs[0].toString());
+            expect(a_.bs[1].toString()).to.eq(a_2.bs[1].toString());
+        })
+
+        it('saving a loaded (incl. lazy refs) document leaves the document intact in the database', async () => {
+            let b = await new B('My B').save();
+            let a = await new A(b).save();
+
+            let a_ = (await (await DB.collection('A')).find({_id: a._id}).toArray())[0];
+
+            a = await A.get<A>(a._id);
+            await a.loadReference('b');
+            await a.save();
+
+            let a_2 = (await (await DB.collection('A')).find({_id: a._id}).toArray())[0];
+            expect(a_._id.toString()).to.eq(a_2._id.toString());
+            expect(a_.b.toString()).to.eq(a_2.b.toString());
+        })
+
+        it('saving a loaded (incl. lazy refs) document with referenced document in an array leaves the document intact in the database', async () => {
+            let b1 = await new B('My B1').save();
+            let b2 = await new B('My B2').save();
+            let a = await new A(undefined, [b1, b2]).save();
+
+            let a_ = (await (await DB.collection('A')).find({_id: a._id}).toArray())[0];
+
+            a = await A.get<A>(a._id);
+            await a.loadReference('bs');
+            await a.save();
+
+            let a_2 = (await (await DB.collection('A')).find({_id: a._id}).toArray())[0];
+            expect(a_.bs[0].toString()).to.eq(a_2.bs[0].toString());
+            expect(a_.bs[1].toString()).to.eq(a_2.bs[1].toString());
+        })
     })
 })

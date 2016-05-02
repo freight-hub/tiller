@@ -6,7 +6,18 @@ import {DB} from "./DB";
 import {EventEmitter} from "events";
 let assert = require('assert');
 
-export async function rebuildInstance<Type extends Collection>(type:Function, doc:any, dontDeserialize?:boolean):Promise<Type> {
+export async function populateReference(doc:any, key:string) {
+    let docTypeName = doc.constructor.name;
+    let targetType:any = __documents[docTypeName]['references'][key].type;
+    if (isArray(doc[key])) {
+        let order = __documents[docTypeName]['ordered'][key];
+        doc[key] = await targetType.find({_id: {$in: doc[key]}}, null, order ? order : null);
+    } else {
+        doc[key] = await targetType.get(doc[key])
+    }
+}
+
+export async function rebuildInstance<Type extends Collection>(type:Function, doc:any, dontDeserialize?:boolean, resolveLazyReferences?:(boolean | Array<string>)):Promise<Type> {
     if (!doc) {
         return doc;
     }
@@ -23,12 +34,12 @@ export async function rebuildInstance<Type extends Collection>(type:Function, do
     for (var i = 0; i < keys.length; i++) {
         let key = keys[i];
         if (__documents[typeName]['references'][key]) {
-            let targetType:any = __documents[typeName]['references'][key];
-            if (isArray(doc[key])) {
-                let order = __documents[typeName]['ordered'][key];
-                doc[key] = await targetType.find({_id: {$in: doc[key]}}, null, order ? order : null);
-            } else {
-                doc[key] = await targetType.get(doc[key])
+            let referenceOptions = __documents[typeName]['references'][key];
+            if(!referenceOptions.lazy ||
+                (typeof(resolveLazyReferences) == 'boolean' && resolveLazyReferences) ||
+                (isArray(resolveLazyReferences) && ~(<Array<string>>resolveLazyReferences).indexOf(key))) {
+
+                await populateReference(doc, key);
             }
         } else if (__documents[typeName]['embeds'][key]) {
             doc[key] = __documents[typeName]['embeds'][key].prototype._deserialize(doc[key]);

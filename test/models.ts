@@ -226,3 +226,28 @@ export class Bar extends Collection{
         this._id = id;
     }
 }
+
+@collection('B')
+export class B extends Collection {
+    name:string
+
+    constructor(name:string) {
+        super();
+        this.name = name;
+    }
+}
+
+@collection('A')
+export class A extends Collection {
+    @reference(B, {lazy: true})
+    b:B
+
+    @reference(B, {lazy: true})
+    bs:Array<B>
+
+    constructor(b:B, bs?:Array<B>) {
+        super();
+        this.b = b;
+        this.bs = bs;
+    }
+}
