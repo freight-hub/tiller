@@ -4,8 +4,6 @@ import {Collection} from "./Collection";
 import {ValidateOptions, ValidationResult, validateDocument} from "./decorators/validate";
 let assert = require('assert');
 
-export type HookType = "beforeValidation" | "beforeSave" | "afterSave";
-
 export class Document {
     __schema:any
 
@@ -77,9 +75,5 @@ export class Document {
 
     async isValid():Promise<boolean> {
         return (await this.validate()).valid();
-    }
-
-    async beforeValidation() {
-
     }
 }

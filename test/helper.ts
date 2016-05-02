@@ -15,7 +15,7 @@ export function includeHelper(cleanBeforeEach?:boolean) {
     cleanBeforeEach = cleanBeforeEach == undefined ? true : false;
 
     async function connect() {
-        await DB.connect('tiller_test');
+        await DB.connect('tiller_test2');
     }
 
     async function disconnect() {

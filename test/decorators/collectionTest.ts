@@ -12,13 +12,13 @@ describe('@collection decorator', () => {
         await folder.save();
 
         let collections = await DB.db.collections();
-        expect(collections[0].namespace).to.eq('tiller_test.folders')
+        expect(collections[0].namespace).to.eq(DB.db.databaseName+'.folders')
     })
 
     it('can use a specified collection name instead of the default derived one', async () => {
         await new WeirdCollectionClazz().save();
 
         let collections = await DB.db.collections();
-        expect(collections[0].namespace).to.eq('tiller_test.weird_collection')
+        expect(collections[0].namespace).to.eq(DB.db.databaseName+'.weird_collection')
     })
 })
