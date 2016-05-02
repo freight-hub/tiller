@@ -9,15 +9,15 @@ let assert = require('assert');
 export async function populateReference(doc:any, key:string) {
     let docTypeName = doc.constructor.name;
     let targetType:any = __documents[docTypeName]['references'][key].type;
-    if (isArray(doc[key])) {
+    if (isArray(doc[key+'_id'])) {
         let order = __documents[docTypeName]['ordered'][key];
-        doc[key] = await targetType.find({_id: {$in: doc[key]}}, null, order ? order : null);
+        doc[key] = await targetType.find({_id: {$in: doc[key+'_id']}}, null, order ? order : null);
     } else {
-        doc[key] = await targetType.get(doc[key])
+        doc[key] = await targetType.get(doc[key+'_id'])
     }
 }
 
-export async function rebuildInstance<Type extends Collection>(type:Function, doc:any, dontDeserialize?:boolean, resolveLazyReferences?:(boolean | Array<string>)):Promise<Type> {
+export async function fromDB<Type extends Collection>(type:Function, doc:any, dontDeserialize?:boolean, resolveLazyReferences?:(boolean | Array<string>)):Promise<Type> {
     if (!doc) {
         return doc;
     }
@@ -32,7 +32,7 @@ export async function rebuildInstance<Type extends Collection>(type:Function, do
 
     let keys = Object.keys(doc);
     for (var i = 0; i < keys.length; i++) {
-        let key = keys[i];
+        let key = keys[i].replace(/\_id$/, '');
         if (__documents[typeName]['references'][key]) {
             let referenceOptions = __documents[typeName]['references'][key];
             if(!referenceOptions.lazy ||
@@ -46,11 +46,11 @@ export async function rebuildInstance<Type extends Collection>(type:Function, do
             if (isArray(doc[key])) {
                 var docs:Array<any> = [];
                 for (var el of doc[key]) {
-                    docs.push(await rebuildInstance<any>(__documents[typeName]['embeds'][key], el));
+                    docs.push(await fromDB<any>(__documents[typeName]['embeds'][key], el));
                 }
                 doc[key] = docs;
             } else {
-                doc[key] = await rebuildInstance<any>(__documents[typeName]['embeds'][key], doc[key], true)
+                doc[key] = await fromDB<any>(__documents[typeName]['embeds'][key], doc[key], true)
             }
         }
     }
@@ -78,7 +78,7 @@ export function setupDocument(type:Function) {
         }
     }
 
-    type.prototype._toDb = (<any>Document.prototype)._toDb;
+    type.prototype.toDB = (<any>Document.prototype).toDB;
 
     if (!type.prototype._serialize) {
         type.prototype._serialize = (<any>Document.prototype)._serialize;

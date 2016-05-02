@@ -17,11 +17,11 @@ describe('Collection', () => {
             await rootBackup1.save();
             root.backups = new Backups(rootBackup1, null);
 
-            let obj = await (<any>root)._toDb(true);
+            let obj = await (<any>root).toDB(true);
             expect(obj).to.have.property('name', 'Applications')
-            expect(obj.owner.toString()).to.eq(bob._id.toString());
+            expect(obj.owner_id.toString()).to.eq(bob._id.toString());
             expect(obj).to.have.property('backups')
-            expect(obj.backups.backup1.toString()).to.eq(rootBackup1._id.toString())
+            expect(obj.backups.backup1_id.toString()).to.eq(rootBackup1._id.toString())
         })
     })
 

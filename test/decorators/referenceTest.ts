@@ -12,8 +12,8 @@ describe('@reference decorator', () => {
         let root = new Folder('Applications', bob);
         await root.save();
 
-        let root_ = (await (await DB.collection('folders')).find({_id: root._id}).toArray())[0];
-        expect(root_.owner.toString()).to.eq(bob._id.toString())
+        let rootObj = (await (await DB.collection('folders')).find({_id: root._id}).toArray())[0];
+        expect(rootObj.owner_id.toString()).to.eq(bob._id.toString())
     })
 
     it('saves referenced documents to the database if they are new', async () => {
@@ -23,8 +23,8 @@ describe('@reference decorator', () => {
 
         expect(bob.isNew()).to.be.false
 
-        let root_ = (await (await DB.collection('folders')).find({_id: root._id}).toArray())[0];
-        expect(root_.owner.toString()).to.eq(bob._id.toString())
+        let rootObj = (await (await DB.collection('folders')).find({_id: root._id}).toArray())[0];
+        expect(rootObj.owner_id.toString()).to.eq(bob._id.toString())
     })
 
     it('saves referenced documents in a sub-document', async () => {
@@ -41,8 +41,8 @@ describe('@reference decorator', () => {
         expect(bob.isNew()).to.be.false
         expect(alice.isNew()).to.be.false
 
-        let root_ = (await (await DB.collection('folders')).find({_id: root._id}).toArray())[0];
-        expect(root_.owner.toString()).to.eq(bob._id.toString())
+        let rootObj = (await (await DB.collection('folders')).find({_id: root._id}).toArray())[0];
+        expect(rootObj.owner_id.toString()).to.eq(bob._id.toString())
     })
 
     it('saves a document with an array of referenced documents, which are saved', async () => {
@@ -57,8 +57,8 @@ describe('@reference decorator', () => {
         let ship = new SpaceShip([bundle1, bundle2]);
         await ship.save();
 
-        let ship_ = (await (await DB.collection('spaceships')).find({_id: ship._id}).toArray())[0];
-        expect([ship_.bundles[0].toString(), ship_.bundles[1].toString()])
+        let shipObj = (await (await DB.collection('spaceships')).find({_id: ship._id}).toArray())[0];
+        expect([shipObj.bundles_id[0].toString(), shipObj.bundles_id[1].toString()])
             .to.deep.equal([bundle1._id.toString(), bundle2._id.toString()])
     })
 
@@ -70,7 +70,7 @@ describe('@reference decorator', () => {
         await ship.save();
 
         let ship_ = (await (await DB.collection('spaceships')).find({_id: ship._id}).toArray())[0];
-        expect([ship_.bundles[0].toString(), null]).to.deep.equal([bundle1._id.toString(), null])
+        expect([ship_.bundles_id[0].toString(), null]).to.deep.equal([bundle1._id.toString(), null])
     })
 
     it('saves a document with an array of referenced documents, which are un-saved', async () => {
@@ -84,7 +84,7 @@ describe('@reference decorator', () => {
         expect(bundle2.isNew()).to.be.false
 
         let ship_ = (await (await DB.collection('spaceships')).find({_id: ship._id}).toArray())[0];
-        expect([ship_.bundles[0].toString(), ship_.bundles[1].toString()])
+        expect([ship_.bundles_id[0].toString(), ship_.bundles_id[1].toString()])
             .to.deep.equal([bundle1._id.toString(), bundle2._id.toString()])
     })
 
@@ -105,8 +105,8 @@ describe('@reference decorator', () => {
             let b = await new B('My B').save();
             let a = await new A(b).save();
             
-            let a_ = (await (await DB.collection('A')).find({_id: a._id}).toArray())[0];
-            expect(a_.b.toString()).to.eq(b._id.toString())
+            let aObj = (await (await DB.collection('A')).find({_id: a._id}).toArray())[0];
+            expect(aObj.b_id.toString()).to.eq(b._id.toString())
         })
 
         it('saves references to referenced documents in an array', async () => {
@@ -114,17 +114,17 @@ describe('@reference decorator', () => {
             let b2 = await new B('My B2').save();
             let a = await new A(undefined, [b1, b2]).save();
 
-            let a_ = (await (await DB.collection('A')).find({_id: a._id}).toArray())[0];
-            expect(a_.bs[0].toString()).to.eq(b1._id.toString())
-            expect(a_.bs[1].toString()).to.eq(b2._id.toString())
+            let aObj = (await (await DB.collection('A')).find({_id: a._id}).toArray())[0];
+            expect(aObj.bs_id[0].toString()).to.eq(b1._id.toString())
+            expect(aObj.bs_id[1].toString()).to.eq(b2._id.toString())
         })
 
         it('returns the id\'s of lazy referenced documents by default', async() => {
             let b = await new B('My B').save();
             let a = await new A(b).save();
 
-            let a_ = await A.get<A>(a._id);
-            expect(a_.b.toString()).to.eq(b._id.toString());
+            a = await A.get<A>(a._id);
+            expect((<any>a).b_id.toString()).to.eq(b._id.toString());
         })
 
         it('returns the id\'s of lazy referenced documents in an array by default', async() => {
@@ -132,9 +132,9 @@ describe('@reference decorator', () => {
             let b2 = await new B('My B2').save();
             let a = await new A(undefined, [b1, b2]).save();
 
-            let a_ = await A.get<A>(a._id);
-            expect(a_.bs[0].toString()).to.eq(b1._id.toString());
-            expect(a_.bs[1].toString()).to.eq(b2._id.toString());
+            a = await A.get<A>(a._id);
+            expect((<any>a).bs_id[0].toString()).to.eq(b1._id.toString());
+            expect((<any>a).bs_id[1].toString()).to.eq(b2._id.toString());
         })
 
         it('returns lazy referenced documents when specified', async() => {
@@ -151,12 +151,12 @@ describe('@reference decorator', () => {
             let b2 = await new B('My B2').save();
             let a = await new A(undefined, [b1, b2]).save();
 
-            let a_ = await A.get<A>(a._id);
-            await a_.loadReference('bs');
-            expect(a_.bs[0].constructor).to.eq(B)
-            expect(a_.bs[1].constructor).to.eq(B)
-            expect(a_.bs[0]._id.toString()).to.eq(b1._id.toString());
-            expect(a_.bs[1]._id.toString()).to.eq(b2._id.toString());
+            a = await A.get<A>(a._id);
+            await a.loadReference('bs');
+            expect(a.bs[0].constructor).to.eq(B)
+            expect(a.bs[1].constructor).to.eq(B)
+            expect(a.bs[0]._id.toString()).to.eq(b1._id.toString());
+            expect(a.bs[1]._id.toString()).to.eq(b2._id.toString());
         })
 
         it('saving a loaded (only eager) document leaves the document intact in the database', async () => {
@@ -170,7 +170,7 @@ describe('@reference decorator', () => {
 
             let a_2 = (await (await DB.collection('A')).find({_id: a._id}).toArray())[0];
             expect(a_._id.toString()).to.eq(a_2._id.toString());
-            expect(a_.b.toString()).to.eq(a_2.b.toString());
+            expect(a_.b_id.toString()).to.eq(a_2.b_id.toString());
         })
 
         it('saving a loaded (only eager) document with referenced documents in an array leaves the document intact in the database', async () => {
@@ -184,8 +184,8 @@ describe('@reference decorator', () => {
             await a.save();
 
             let a_2 = (await (await DB.collection('A')).find({_id: a._id}).toArray())[0];
-            expect(a_.bs[0].toString()).to.eq(a_2.bs[0].toString());
-            expect(a_.bs[1].toString()).to.eq(a_2.bs[1].toString());
+            expect(a_.bs_id[0].toString()).to.eq(a_2.bs_id[0].toString());
+            expect(a_.bs_id[1].toString()).to.eq(a_2.bs_id[1].toString());
         })
 
         it('saving a loaded (incl. lazy refs) document leaves the document intact in the database', async () => {
@@ -200,7 +200,7 @@ describe('@reference decorator', () => {
 
             let a_2 = (await (await DB.collection('A')).find({_id: a._id}).toArray())[0];
             expect(a_._id.toString()).to.eq(a_2._id.toString());
-            expect(a_.b.toString()).to.eq(a_2.b.toString());
+            expect(a_.b_id.toString()).to.eq(a_2.b_id.toString());
         })
 
         it('saving a loaded (incl. lazy refs) document with referenced document in an array leaves the document intact in the database', async () => {
@@ -215,8 +215,21 @@ describe('@reference decorator', () => {
             await a.save();
 
             let a_2 = (await (await DB.collection('A')).find({_id: a._id}).toArray())[0];
-            expect(a_.bs[0].toString()).to.eq(a_2.bs[0].toString());
-            expect(a_.bs[1].toString()).to.eq(a_2.bs[1].toString());
+            expect(a_.bs_id[0].toString()).to.eq(a_2.bs_id[0].toString());
+            expect(a_.bs_id[1].toString()).to.eq(a_2.bs_id[1].toString());
+        })
+
+        it('updates the reference properly, when the reference is lazy and has not been loaded', async () => {
+            let b1 = await new B('My B1').save();
+            let b2 = await new B('My B2').save();
+            let a = await new A(b1).save();
+
+            a = await A.get<A>(a._id);
+            a.b = b2;
+            await a.save();
+
+            a = await (await A.get<A>(a._id)).loadReference('b');
+            expect(a.b._id.toString()).to.eq(b2._id.toString());
         })
     })
 })
