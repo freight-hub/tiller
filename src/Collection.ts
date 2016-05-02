@@ -1,6 +1,6 @@
 import {DB} from "./DB";
 import {pmap} from "./common/array";
-import {rebuildInstance} from "./core";
+import {fromDB} from "./core";
 import {Document} from "./Document";
 import * as mongodb from 'mongodb';
 import {InsertOneWriteOpResult} from "mongodb";
@@ -20,7 +20,7 @@ export abstract class Collection extends Document {
 
     static async create<Type extends Collection>(obj:any):Promise<Type> {
         let type = this.__type || (this._collectionName ? this : null);
-        return rebuildInstance<Type>(type, obj);
+        return fromDB<Type>(type, obj);
     }
 
     static async get<Type extends Collection>(_id:any):Promise<Type> {
@@ -43,7 +43,7 @@ export abstract class Collection extends Document {
         }
         let docs = await cursor.toArray();
         return pmap<any, Type>(docs, async (doc) => {
-            doc = await rebuildInstance(type, doc);
+            doc = await fromDB(type, doc);
             doc.__isSaved = true;
             return doc;
         });
@@ -78,7 +78,7 @@ export abstract class Collection extends Document {
 
         let collectionName = (<any>this)._collectionName;
         let coll = await DB.collection(collectionName)
-        let doc = await this._toDb(deep)
+        let doc = await this.toDB(deep)
         if (this.isNew() && !upsert) {
             let result:InsertOneWriteOpResult = await coll.insertOne(doc)
             this._id = result.insertedId;
