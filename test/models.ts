@@ -231,7 +231,7 @@ export class Bar extends Collection{
 export class B extends Collection {
     name:string
 
-    constructor(name:string) {
+    constructor(name?:string) {
         super();
         this.name = name;
     }
@@ -245,7 +245,11 @@ export class A extends Collection {
     @reference(B, {lazy: true})
     bs:Array<B>
 
-    constructor(b:B, bs?:Array<B>) {
+    @reference(B, {lazy: true})
+    @validate({required: true})
+    requiredB:B
+
+    constructor(b?:B, bs?:Array<B>) {
         super();
         this.b = b;
         this.bs = bs;

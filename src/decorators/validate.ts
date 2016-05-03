@@ -39,9 +39,11 @@ export async function validateDocument(doc:any):Promise<ValidationResult> {
         }
     }
 
+    let validate = __documents[doc.constructor.name]['validate'];
+    let references = __documents[doc.constructor.name]['references'];
+
     if (!doc.__schema) {
         var schemaOpts = {};
-        let validate = __documents[doc.constructor.name]['validate'];
         Object.getOwnPropertyNames(validate).forEach(p => {
             let validateOptions:ValidateOptions = validate[p];
             if (validateOptions.required && !validateOptions.type) {
@@ -55,6 +57,16 @@ export async function validateDocument(doc:any):Promise<ValidationResult> {
             }
         })
         doc.__schema = schema(schemaOpts);
+    }
+
+    let requiredLazyRefProps = Object.keys(validate)
+        .map(prop => {return {prop: prop, validate: validate[prop], reference: references[prop]}})
+        .filter(v => v.validate.required && v.reference && v.reference.lazy);
+
+    for(var requiredLazyRefProp of requiredLazyRefProps) {
+        if(!doc[requiredLazyRefProp.prop] && doc[requiredLazyRefProp.prop+'_id']) {
+            await doc.loadReference(requiredLazyRefProp.prop);
+        }
     }
 
     let errors = doc.__schema.errors(doc) || {};
