@@ -1,6 +1,6 @@
 {
   "name": "tiller",
-  "version": "0.1.15",
+  "version": "0.1.16",
   "description": "MongoDB ODM for TypeScript",
   "repository": {
     "type": "git",

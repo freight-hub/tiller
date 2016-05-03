@@ -295,6 +295,33 @@ describe('Collection', () => {
         })
     })
 
+    describe('#updateProperties', () => {
+        it('updates scalar properties of unsaved models', async () => {
+            let file = new File('name1');
+            await file.updateProperties({name: 'name2'})
+            expect(file.name).to.eq('name2');
+        })
+
+        it('updates scalar properties of saved models', async () => {
+            let file = await new File('name1').save();
+            await file.updateProperties({name: 'name2'})
+            await file.save();
+
+            file = await File.get<File>(file._id);
+            expect(file.name).to.eq('name2');
+        })
+
+        it('updates referenced documents of saved models', async () => {
+            let user = await new User('anna').save();
+            let file = await new File('name1').save();
+            await file.updateProperties({owner_id: user._id})
+            await file.save();
+
+            file = await File.get<File>(file._id);
+            expect(file.owner._id.toString()).to.eq(user._id.toString());
+        })
+    })
+
     it('save() -> find() -> save() -> find() is an idempotent operation chain', async() => {
         let bob = new User('bob');
         let root = new Folder('Applications', bob);

@@ -23,6 +23,23 @@ export abstract class Collection extends Document {
         return fromDB<Type>(type, obj);
     }
 
+    /**
+     * Allows "mass-override" of properties, using a plain JavaScript object/hierarchy.
+     *
+     * @param obj
+     * @returns {Collection}
+     */
+    async updateProperties<Type extends Collection>(obj) {
+        let doc = await fromDB(this.constructor, obj);
+        for(var key of Object.keys(doc)) {
+            if(key.indexOf('__') == 0) {
+                continue;
+            }
+            this[key] = doc[key];
+        }
+        return this;
+    }
+
     static async get<Type extends Collection>(_id:any):Promise<Type> {
         return this.findOne<Type>({_id: _id});
     }
