@@ -1,5 +1,5 @@
 import {expect} from 'chai'
-import {Folder, User, Backups, File, Bundle, SpaceShip, Item, Loc, House, Door, A, B, A2} from "../models";
+import {Folder, User, Backups, File, Bundle, SpaceShip, Item, Loc, House, Door, A, B, A2, A4, B1} from "../models";
 import {includeHelper} from '../helper'
 import {DB} from "../../src/DB";
 import {ValidationResult} from "../../src/decorators/validate";
@@ -92,7 +92,22 @@ describe('@validate decorator', () => {
             await a.save();
 
             a = await A2.get<A2>(a._id);
-            a.save();
+            a.save(); // like validate ()...
+        })
+        
+        it('can validate embedded lists of lists', async() => {
+            let a = new A4();
+            a.bs = [[await new B1()]]
+            expect(await a.isValid()).to.be.false;
+
+            a.bs[0][0].name = 'yes'
+            expect(await a.isValid()).to.be.true;
+        })
+
+        it('can validate referenced lists of lists', async() => {
+            let a = new A4();
+            a.bs_ref = [[await new B1('hello').save()]]
+            expect(await a.isValid()).to.be.true;
         })
     });
 

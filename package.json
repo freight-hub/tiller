@@ -1,6 +1,6 @@
 {
   "name": "tiller",
-  "version": "0.1.18",
+  "version": "0.1.19",
   "description": "MongoDB ODM for TypeScript",
   "keywords": [
     "mongodb",
@@ -23,7 +23,8 @@
   "main": "lib/src/index.js",
   "typings": "lib/src/index",
   "files": [
-    "lib/src/"
+    "lib/src/",
+    "src/"
   ],
   "author": "Erik Muttersbach",
   "license": "MIT",

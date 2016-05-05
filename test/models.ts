@@ -237,6 +237,18 @@ export class B extends Collection {
     }
 }
 
+@collection('B1')
+export class B1 extends Collection {
+    
+    @validate({required: true})
+    name:string
+
+    constructor(name?:string) {
+        super();
+        this.name = name;
+    }
+}
+
 @collection('A')
 export class A extends Collection {
     @reference(B, {lazy: true})
@@ -264,5 +276,16 @@ export class A3 extends Collection {
     //@reference([B])
     bs:B
 }
+
+@collection('A4')
+export class A4 extends Collection {
+
+    @embed([[B]])
+    bs:Array<Array<B>>
+
+    @reference([[B]])
+    bs_ref:Array<Array<B>>
+}
+
 
 

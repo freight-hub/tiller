@@ -16,27 +16,29 @@ export function validate(options:ValidateOptions):any {
 }
 
 export async function validateDocument(doc:any):Promise<ValidationResult> {
-    if(typeof(doc.beforeValidation) == 'function') {
+    async function validateEmbedded(v:ValidationResult, doc) {
+        if (!doc) return;
+        if (!isArray(doc)) {
+            let embedValidation = await doc.validate();
+            v.addErrors(embedValidation.errors, prop);
+        } else {
+            for (var el of doc) {
+                if (el) {
+                    let embedValidation = await validateEmbedded(v, el);
+                }
+            }
+        }
+    }
+
+    if (typeof(doc.beforeValidation) == 'function') {
         await doc.beforeValidation();
     }
 
     let v = new ValidationResult();
 
     let embeds = __documents[doc.constructor.name]['embeds'];
-    for(var prop of Object.getOwnPropertyNames(embeds)) {
-        if(doc[prop]) {
-            if(!isArray(doc[prop])) {
-                let embedValidation = await doc[prop].validate();
-                v.addErrors(embedValidation.errors, prop);
-            } else {
-                for(var el of doc[prop]) {
-                  if(el) {
-                    let embedValidation = await el.validate();
-                    v.addErrors(embedValidation.errors, prop);
-                  }
-                }
-            }
-        }
+    for (var prop of Object.getOwnPropertyNames(embeds)) {
+        await validateEmbedded(v, doc[prop]);
     }
 
     let validate = __documents[doc.constructor.name]['validate'];
@@ -63,11 +65,13 @@ export async function validateDocument(doc:any):Promise<ValidationResult> {
     }
 
     let requiredLazyRefProps = Object.keys(validate)
-        .map(prop => {return {prop: prop, validate: validate[prop], reference: references[prop]}})
+        .map(prop => {
+            return {prop: prop, validate: validate[prop], reference: references[prop]}
+        })
         .filter(v => v.validate.required && v.reference && v.reference.lazy);
 
-    for(var requiredLazyRefProp of requiredLazyRefProps) {
-        if(!doc[requiredLazyRefProp.prop] && doc[requiredLazyRefProp.prop+'_id']) {
+    for (var requiredLazyRefProp of requiredLazyRefProps) {
+        if (!doc[requiredLazyRefProp.prop] && doc[requiredLazyRefProp.prop + '_id']) {
             await doc.loadReference(requiredLazyRefProp.prop);
         }
     }
@@ -101,8 +105,8 @@ export class ValidationResult {
     }
 
     addErrors(errors:{[property:string]:Array<string>}, prefix:string) {
-        for(var prop of Object.keys(errors || {})) {
-            errors[prop].forEach(e => this.add(prefix+'.'+prop, e))
+        for (var prop of Object.keys(errors || {})) {
+            errors[prop].forEach(e => this.add(prefix + '.' + prop, e))
         }
     }
 
@@ -112,8 +116,8 @@ export class ValidationResult {
 
     toString() {
         let str = [];
-        for(var key of Object.keys(this.errors || {})) {
-            str.push(key+': '+this.errors[key].join(','));
+        for (var key of Object.keys(this.errors || {})) {
+            str.push(key + ': ' + this.errors[key].join(','));
         }
         return str.join('\n');
     }
