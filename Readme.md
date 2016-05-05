@@ -1,3 +1,4 @@
+[![NPM Module](https://badge.fury.io/js/tiller.svg)](https://npmjs.org/package/tiller)
 [![Build Status](https://travis-ci.org/erikmuttersbach/tiller.svg?branch=master)](https://travis-ci.org/erikmuttersbach/tiller)
 
 # Tiller - MongoDB ODM for TypeScript
