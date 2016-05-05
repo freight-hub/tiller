@@ -19,6 +19,6 @@ describe('@collection decorator', () => {
         await new WeirdCollectionClazz().save();
 
         let collections = await DB.db.collections();
-        expect(collections[0].find(c => c.namespace == (DB.db.databaseName+'.weird_collection'))).to.exist
+        expect(collections[0].find(c => c.namespace.indexOf('.weird_collection') >= 0)).to.exist
     })
 })
