@@ -1,8 +1,18 @@
 import {__documents, populateReference, fromDB} from "./core";
-import {isArray} from "./common/array";
+import {isArray, pmap} from "./common/array";
 import {Collection} from "./Collection";
 import {ValidateOptions, ValidationResult, validateDocument} from "./decorators/validate";
 let assert = require('assert');
+
+async function mapObjectHierarchy(obj, processScalar:(obj:any) => Promise<any>) {
+    if(obj && isArray(obj)) {
+        return await pmap(obj, async function(el) {
+            return await mapObjectHierarchy(el, processScalar);
+        })
+    } else {
+        return await processScalar(obj);
+    }
+}
 
 export class Document {
     __schema:any
@@ -24,6 +34,7 @@ export class Document {
                 continue;
             }
 
+            // TODO This doesnt support arrays of arrays
             // this[key] holds an object that is a referenced document
             else if (!isArray(this[key]) && __document && __document['references'][key]) {
                 if (saveDeep && this[key].isNew()) {
@@ -43,14 +54,10 @@ export class Document {
                 }
             }
 
-            // this[key] holds an object that is an embedded document
-            else if (!isArray(this[key]) && __documents[this[key].constructor.name] && __documents[(<any>this).constructor.name]['embeds'][key]) {
-                copy[key] = await this[key].toDB(saveDeep);
-            }
-
-            // this[key] is an array, holding embedded docments
-            else if (isArray(this[key]) && __documents[(<any>this).constructor.name]['embeds'][key]) {
-                copy[key] = await Promise.all(this[key].map((v:Document) => v ? v.toDB(saveDeep) : v));
+            // this[key] holds embedded documents
+            else if (__document['embeds'][key]) {
+                //copy[key] = await Promise.all(this[key].map((v:Document) => v ? v.toDB(saveDeep) : v));
+                copy[key] = await mapObjectHierarchy(this[key], async (obj) => obj ? await obj.toDB(saveDeep) : obj);
             }
 
             else {

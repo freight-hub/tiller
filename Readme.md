@@ -242,6 +242,9 @@ also recreate embedded and referenced documents.
 * Keep upward references in @document
 * Implement $lookup aggregation for fast loading of references
 
+## Bugs
+* Arrays of Referenced Objects are supported, but not arrays of arrays of referenced objects
+
 ## Issues
 * "Required" validation of references, when we don't deep-save
 

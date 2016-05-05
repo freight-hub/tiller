@@ -1,5 +1,5 @@
 import {expect} from 'chai'
-import {Folder, User, Backups, File, Bundle, SpaceShip, Item, Loc} from "../models";
+import {Folder, User, Backups, File, Bundle, SpaceShip, Item, Loc, A4, B} from "../models";
 import {includeHelper} from '../helper'
 import {DB} from "../../src/DB";
 
@@ -24,6 +24,15 @@ describe('@embed decorator', () => {
         expect(bundle_.items).to.eqls([{name: 'Apple'}, {name: 'Banana'}])
     })
 
+    it('saves a document with an array of an array of embedded documents', async () => {
+        let a = new A4();
+        a.bs = [[new B('hello')]]
+        await a.save();
+
+        let aObj = (await (await DB.collection('A4')).find({_id: a._id}).toArray())[0];
+        expect(aObj.bs).to.eqls([[{name: 'hello'}]])
+    })
+
     it('saves a document with an array of embedded documents, some being null', async () => {
         let bundle = new Bundle(1, [new Item('Apple'), new Item('Banana'), null]);
         await bundle.save();
@@ -31,6 +40,15 @@ describe('@embed decorator', () => {
         let bundle_ = (await (await DB.collection('bundles')).find({_id: bundle._id}).toArray())[0];
         expect(bundle_.id).to.eq(1)
         expect(bundle_.items).to.eqls([{name: 'Apple'}, {name: 'Banana'}, null])
+    })
+
+    it('saves a document with an array of an array of embedded documents, some being null', async () => {
+        let a = new A4();
+        a.bs = [[new B('b1'), new B('b2')], null, [new B('b3'), null]];
+        await a.save();
+
+        let aObj = (await (await DB.collection('A4')).find({_id: a._id}).toArray())[0];
+        expect(aObj.bs).to.eqls([[{name: 'b1'}, {name: 'b2'}], null, [{name: 'b3'}, null]])
     })
 
     it('saves a document with an array of embedded document set to null', async () => {
