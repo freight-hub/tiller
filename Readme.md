@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/erikmuttersbach/tiller.svg?branch=master)](https://travis-ci.org/erikmuttersbach/tiller)
+
 # Tiller - MongoDB ODM for TypeScript
 Tiller is an ODM for MongoDB, written in TypeScript with an ActiveRecord-inspired API.
 
