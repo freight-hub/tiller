@@ -12,7 +12,8 @@ describe('@collection decorator', () => {
         await folder.save();
 
         let collections = await DB.db.collections();
-        expect(collections[0].namespace).to.eq(DB.db.databaseName+'.folders')
+        console.log(collections);
+        expect(collections[0].find(c => c.namespace == (DB.db.databaseName+'.folders'))).to.exist
     })
 
     it('can use a specified collection name instead of the default derived one', async () => {
