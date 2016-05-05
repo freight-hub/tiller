@@ -1,7 +1,13 @@
 import {__documents, setupDocument} from "../core";
 let assert = require('assert');
 
-export function reference(type:Function, options?:ReferenceOptions):any {
+export interface CompoundReferenceType {
+    types:Array<any>
+}
+export type ScalarReferenceType = Function | CompoundReferenceType;
+export type ReferenceType = ScalarReferenceType | Array<ScalarReferenceType> | Array<Array<ScalarReferenceType>> | Array<Array<Array<ScalarReferenceType>>>;
+
+export function reference(type:ReferenceType, options?:ReferenceOptions):any {
     return function (target:any, propertyKey:string, descriptor:TypedPropertyDescriptor<any>) {
         setupDocument(target.constructor);
         assert(__documents[target.constructor.name]);
@@ -12,5 +18,6 @@ export function reference(type:Function, options?:ReferenceOptions):any {
 }
 
 export interface ReferenceOptions {
-    lazy:boolean
+    lazy?:boolean
+    type?:ReferenceType
 }

@@ -309,6 +309,8 @@ describe('Collection', () => {
 
             file = await File.get<File>(file._id);
             expect(file.name).to.eq('name2');
+            
+            
         })
 
         it('updates referenced documents of saved models', async () => {

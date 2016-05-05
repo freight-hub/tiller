@@ -56,7 +56,10 @@ export async function validateDocument(doc:any):Promise<ValidationResult> {
                 schemaOpts['?' + p] = [validateOptions.type];
             }
         })
-        doc.__schema = schema(schemaOpts);
+        Object.defineProperty(doc, '__schema', {
+            enumerable: false,
+            value: schema(schemaOpts)
+        })
     }
 
     let requiredLazyRefProps = Object.keys(validate)

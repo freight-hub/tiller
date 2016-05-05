@@ -1,6 +1,7 @@
 import {__documents, setupDocument} from "../core";
 import {DB} from "../DB";
 import {__collections} from "../core";
+import {isArray} from "../common/array";
 let assert = require('assert');
 
 export function index(options?:IndexOptions):any {
@@ -16,8 +17,13 @@ export interface IndexOptions {
 }
 
 DB.on('connected', () => {
+    function unwindType(type) {
+        return isArray(type) ? unwindType(type[0]) : type;
+    }
+
     function it(typeName, path) {
         var paths = [];
+        let d = __documents;
         let indexes = __documents[typeName]['indexes'];
         for (var prop in indexes) {
             paths.push({
@@ -28,7 +34,7 @@ DB.on('connected', () => {
 
         let embeds = __documents[typeName]['embeds'];
         for (var prop in embeds) {
-            paths = paths.concat(it(embeds[prop].name, (path ? path + '.' : '') + prop));
+            paths = paths.concat(it(unwindType(embeds[prop]).name, (path ? path + '.' : '') + prop));
         }
         return paths;
     }

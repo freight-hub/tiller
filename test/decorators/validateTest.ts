@@ -1,5 +1,5 @@
 import {expect} from 'chai'
-import {Folder, User, Backups, File, Bundle, SpaceShip, Item, Loc, House, Door, A, B} from "../models";
+import {Folder, User, Backups, File, Bundle, SpaceShip, Item, Loc, House, Door, A, B, A2} from "../models";
 import {includeHelper} from '../helper'
 import {DB} from "../../src/DB";
 import {ValidationResult} from "../../src/decorators/validate";
@@ -87,11 +87,11 @@ describe('@validate decorator', () => {
         })
 
         it('returns true if a required lazy relationship is present, but not loaded', async() => {
-            let a = new A();
+            let a = new A2();
             a.requiredB = await new B().save();
             await a.save();
 
-            a = await A.get<A>(a._id);
+            a = await A2.get<A2>(a._id);
             a.save();
         })
     });

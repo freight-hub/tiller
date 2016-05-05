@@ -21,7 +21,9 @@ export class _DB extends EventEmitter {
     }
 
     async disconnect(force?:boolean) {
-        await this.db.close(force);
+        if(this.db) {
+            await this.db.close(force);
+        }
         this.db = null;
     }
 

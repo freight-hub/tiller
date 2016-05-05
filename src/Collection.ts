@@ -16,6 +16,9 @@ export abstract class Collection extends Document {
     constructor() {
         super();
         this.__isSaved = false;
+        Object.defineProperty(this, '__isSaved', {
+            enumerable: false
+        })
     }
 
     static async create<Type extends Collection>(obj:any):Promise<Type> {

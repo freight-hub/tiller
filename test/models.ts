@@ -28,9 +28,9 @@ export class File extends Collection {
     @reference(User)
     owner:User
 
-    @reference(User)
+    @reference([User])
     editors:Array<User>
-
+    
     constructor(name:string, owner?:User) {
         super();
         this.name = name;
@@ -66,10 +66,10 @@ export class Folder extends Collection {
     @embed(Backups)
     backups:Backups
 
-    @reference(File)
+    @reference([Folder])
     subfolders:Array<Folder>
 
-    @reference(File) @ordered({name: 1})
+    @reference([File]) @ordered(['name'], ['asc'])
     files:Array<File>
 
     constructor(name?:string, owner?:User) {
@@ -121,10 +121,10 @@ export class Loc {
 export class Bundle extends Collection {
     id:number
 
-    @embed(Item)
+    @embed([Item])
     items:Array<Item>
 
-    @embed(Loc)
+    @embed([Loc])
     locations:Array<Loc>
 
     constructor(id:number, items?:Array<Item>, locations?:Array<Loc>) {
@@ -141,7 +141,7 @@ export class Bundle extends Collection {
 
 @collection()
 export class SpaceShip extends Collection {
-    @reference(Bundle)
+    @reference([Bundle])
     bundles:Array<Bundle>
 
     constructor(bundles:Array<Bundle>) {
@@ -204,7 +204,7 @@ export class House extends Collection {
     @validate({required: false, type: Boolean})
     dog:boolean
 
-    @embed(Door)
+    @embed([Door])
     doors:Array<Door>
 
     @validate({type: ['red', 'white']})
@@ -242,12 +242,8 @@ export class A extends Collection {
     @reference(B, {lazy: true})
     b:B
 
-    @reference(B, {lazy: true})
+    @reference([B], {lazy: true})
     bs:Array<B>
-
-    @reference(B, {lazy: true})
-    @validate({required: true})
-    requiredB:B
 
     constructor(b?:B, bs?:Array<B>) {
         super();
@@ -255,3 +251,18 @@ export class A extends Collection {
         this.bs = bs;
     }
 }
+
+@collection('A2')
+export class A2 extends Collection {
+    @reference(B, {lazy: true})
+    @validate({required: true})
+    requiredB:B
+}
+
+@collection('A3')
+export class A3 extends Collection {
+    //@reference([B])
+    bs:B
+}
+
+

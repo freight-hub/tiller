@@ -1,14 +1,26 @@
 import {setupDocument, __documents} from "../core";
+import * as _ from 'lodash';
 let assert = require('assert');
 
-export function ordered(order:any):any {
+export interface FieldOrder {
+    [field: string]: 'asc' | 'desc';
+}
+
+export function ordered(fields:Array<string>, order?:Array<'asc' | 'desc'>):any {
     return function (target:any, propertyKey:string, descriptor:TypedPropertyDescriptor<any>) {
-        if(!order) {
-            throw new Error('Parameter of @ordered decorator at '+target.constructor.name+':'+propertyKey+' must be provided');
+        if(order && fields.length != order.length) {
+            throw new Error('If order of fields in @ordered is given, the order of all fields must be specified.')
         }
 
         setupDocument(target.constructor);
         
-        __documents[target.constructor.name]['ordered'][propertyKey] = order;
+        __documents[target.constructor.name]['ordered'][propertyKey] = {
+            fields: fields,
+            order: order
+        };
     };
+}
+
+export function orderArray(array, order:Array<FieldOrder>) {
+    return _.orderBy(array, order.map(o => Object.keys(o)[0]), order.map(o => o[Object.keys(o)[0]]));
 }

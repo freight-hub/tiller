@@ -232,12 +232,12 @@ also recreate embedded and referenced documents.
 
 ## Roadmap
 * DIRTY Tracking to improve save speed
-* Implement lazy loading
 * Remove problems with two documents/collections named equally
 * Implement batch operations
 * Add Continous Integration build
 * Complete Readme: References, Embedded Documents
 * Keep upward references in @document
+* Implement $lookup aggregation for fast loading of references
 
 ## Issues
 * "Required" validation of references, when we don't deep-save
