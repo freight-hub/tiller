@@ -12,7 +12,6 @@ describe('@collection decorator', () => {
         await folder.save();
 
         let collections = await DB.db.collections();
-        console.log(collections);
         expect(collections[0].find(c => c.namespace == (DB.db.databaseName+'.folders'))).to.exist
     })
 
@@ -20,6 +19,6 @@ describe('@collection decorator', () => {
         await new WeirdCollectionClazz().save();
 
         let collections = await DB.db.collections();
-        expect(collections[0].namespace).to.eq(DB.db.databaseName+'.weird_collection')
+        expect(collections[0].find(c => c.namespace == (DB.db.databaseName+'.weird_collection'))).to.exist
     })
 })
