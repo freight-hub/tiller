@@ -2,6 +2,20 @@
   "name": "tiller",
   "version": "0.1.18",
   "description": "MongoDB ODM for TypeScript",
+  "keywords": [
+    "mongodb",
+    "document",
+    "collection",
+    "orm",
+    "odm",
+    "validation"
+  ],
+  "contributors": [
+    {
+      "name": "Erik Muttersbach",
+      "email": "erik@muttersbach.net"
+    }
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/erikmuttersbach/tiller.git/"
