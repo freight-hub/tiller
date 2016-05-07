@@ -4,18 +4,16 @@ import {EventEmitter} from "events";
 
 export class _DB extends EventEmitter {
     db:Db
-    dbName:string
 
-    async connect(dbName:string) {
-        this.dbName = dbName;
+    async connect(uri:string) {
 
         if (this.db) {
             // Already connected
         } else {
-            let url = 'mongodb://localhost:27017/' + this.dbName;
+            //let url = 'mongodb://localhost:27017/' + this.dbName;
             
             let options:MongoClientOptions = {server: {socketOptions: {autoReconnect: true}}};
-            this.db = await MongoClient.connect(url, options)
+            this.db = await MongoClient.connect(uri, options)
             this.emit('connected');
         }
     }

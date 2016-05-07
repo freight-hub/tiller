@@ -7,7 +7,7 @@ describe('@index decorator', () => {
 
     before(async() => {
         await DB.disconnect(true);
-        await DB.connect('tiller_test_indexes');
+        await DB.connect('mongodb://localhost:27017/tiller_test_indexes');
     })
 
     it('creates a normal index', async() => {
