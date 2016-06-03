@@ -1,6 +1,7 @@
 import {MongoClient, Db, Collection} from "mongodb";
 import {MongoClientOptions} from "mongodb";
 import {EventEmitter} from "events";
+import {createIndexes} from "./decorators/index";
 
 export class _DB extends EventEmitter {
     db:Db
@@ -13,7 +14,7 @@ export class _DB extends EventEmitter {
                 await this.db.authenticate(user, password)
             }
 
-            this.emit('connected');
+            await createIndexes()
         }
     }
 

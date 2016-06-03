@@ -232,4 +232,10 @@ describe('@reference decorator', () => {
             expect(a.b._id.toString()).to.eq(b2._id.toString());
         })
     })
+
+    describe('with a huge amount of referenced objects in an array', () => {
+        it('loads all correctly and fast', async function() {
+            
+        })
+    })
 })

@@ -135,3 +135,13 @@ export function __collections() {
 }
 
 export var __documents = {}
+
+/**
+ * Takes a type and flattens it
+ * 
+ * @param type
+ * @returns {any}
+ */
+export function unwindType(type) {
+    return isArray(type) ? unwindType(type[0]) : type;
+}

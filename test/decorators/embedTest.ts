@@ -2,6 +2,7 @@ import {expect} from 'chai'
 import {Folder, User, Backups, File, Bundle, SpaceShip, Item, Loc, A4, B} from "../models";
 import {includeHelper} from '../helper'
 import {DB} from "../../src/DB";
+import {embed} from "../../src/decorators/embed";
 
 describe('@embed decorator', () => {
     includeHelper();
@@ -68,5 +69,15 @@ describe('@embed decorator', () => {
         expect(bundle_.id).to.eq(1)
         expect(bundle_.items).to.eq(null)
         expect(bundle_.locations).to.eqls([{type: 'Point', coordinates: [1,2]}, {type: 'Point', coordinates: [3,4]}])
+    })
+
+    it('throws an error if the embedded type is undefined', async () => {
+        // Manually call the decorator
+        try {
+            embed([undefined])(Bundle, 'someUndefinedEmbeds', null)
+            expect.fail()
+        } catch(e) {
+            expect(e.message).to.eq('Type of @embeds decorator at Function:someUndefinedEmbeds is undefined')
+        }
     })
 })

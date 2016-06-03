@@ -1,4 +1,4 @@
-import {__documents, setupDocument} from "../core";
+import {__documents, setupDocument, unwindType} from "../core";
 import {DB} from "../DB";
 import {__collections} from "../core";
 import {isArray} from "../common/array";
@@ -16,11 +16,7 @@ export interface IndexOptions {
     unique?:boolean
 }
 
-DB.on('connected', () => {
-    function unwindType(type) {
-        return isArray(type) ? unwindType(type[0]) : type;
-    }
-
+export async function createIndexes() {
     function it(typeName, path) {
         var paths = [];
         let d = __documents;
@@ -56,9 +52,5 @@ DB.on('connected', () => {
         }
     }
 
-    Promise.all(promises).then((r) => {
-        DB.emit('indexesCreated', r);
-    }).catch((e) => {
-        console.error(e.stack);
-    })
-});
+    await Promise.all(promises)
+}
