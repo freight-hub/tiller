@@ -10,7 +10,7 @@ let assert = require('assert');
 export async function populateReference(doc:any, key:string) {
     let docTypeName = doc.constructor.name;
     let referenceSpec = __documents[docTypeName]['references'][key];
-    doc[key] = await unwind(referenceSpec.type, doc[key + '_id'], (targetType, value) => {
+    doc[key] = await unwind(referenceSpec.type(), doc[key + '_id'], (targetType, value) => {
         return targetType.get(value)
     })
 
@@ -116,6 +116,9 @@ export function setupDocument(type:Function) {
     if (!type.prototype.validate) {
         type.prototype.validate = (<any>Document.prototype).validate;
     }
+    if (!type.prototype.loadReference) {
+        type.prototype.loadReference = (<any>Document.prototype).loadReference;
+    }
 
     if ((<any>type).find) {
         (<any>type).find = (<any>type).find.bind(_.extend(type, {
@@ -138,7 +141,7 @@ export var __documents = {}
 
 /**
  * Takes a type and flattens it
- * 
+ *
  * @param type
  * @returns {any}
  */

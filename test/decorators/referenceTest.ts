@@ -2,6 +2,8 @@ import {expect} from 'chai'
 import {Folder, User, Backups, File, Bundle, SpaceShip, A, B} from "../models";
 import {includeHelper} from '../helper'
 import {DB} from "../../src/DB";
+import {AA} from "../models/AA";
+import {BB} from "../models/BB";
 
 describe('@reference decorator', () => {
     includeHelper();
@@ -233,9 +235,20 @@ describe('@reference decorator', () => {
         })
     })
 
-    describe('with a huge amount of referenced objects in an array', () => {
-        it('loads all correctly and fast', async function() {
-            
-        })
+    it('can handle transitive cyclic imports', async () => {
+        let a = new AA();
+        await a.save()
+
+        let b = new BB();
+        b.aa = a;
+        await b.save()
+
+        a.bb = b;
+        await a.save()
+
+        let _b = await BB.get<BB>(b._id)
+
+        expect(_b).to.be.instanceOf(BB)
+        expect(_b.aa).to.be.instanceOf(AA)
     })
 })
