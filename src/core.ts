@@ -8,6 +8,8 @@ let assert = require('assert');
 
 // TODO This can be optimized with $lookup and also $in
 export async function populateReference(doc:any, key:string) {
+    if(doc[key]) return;
+
     let docTypeName = doc.constructor.name;
     let referenceSpec = __documents[docTypeName]['references'][key];
     doc[key] = await unwind(referenceSpec.type(), doc[key + '_id'], (targetType, value) => {

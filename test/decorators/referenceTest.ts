@@ -161,6 +161,28 @@ describe('@reference decorator', () => {
             expect(a.bs[1]._id.toString()).to.eq(b2._id.toString());
         })
 
+        it('calling loadReference twice is idempotent', async() => {
+            let b = await new B('My B').save();
+            let a = await new A(b).save();
+
+            let a_ = await A.get<A>(a._id);
+            await a_.loadReference('b');
+            await a_.loadReference('b');
+            expect(a_).to.exist
+            expect(a_.b.name).to.eq('My B')
+        })
+
+        it('calling loadReference on a new (fresh) object keeps the property intact', async() => {
+            let b = await new B('My B').save();
+            let a = await new A(b).save();
+
+            expect(a).to.exist
+            expect(a.b.name).to.eq('My B')
+            await a.loadReference('b');
+            expect(a).to.exist
+            expect(a.b.name).to.eq('My B')
+        })
+
         it('saving a loaded (only eager) document leaves the document intact in the database', async () => {
             let b = await new B('My B').save();
             let a = await new A(b).save();
