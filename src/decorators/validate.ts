@@ -1,6 +1,7 @@
 import {setupDocument, __documents} from "../core";
 import {Document} from "../Document";
 import {isArray} from "../common/array";
+import Bluebird = require("bluebird");
 let schema = require('js-schema');
 
 export function validate(options:ValidateOptions):any {
@@ -60,7 +61,7 @@ export async function validateDocument(doc:any):Promise<ValidationResult> {
         })
         Object.defineProperty(doc, '__schema', {
             enumerable: false,
-            value: schema(schemaOpts)
+            value: Object.keys(schemaOpts).length > 0 ? schema(schemaOpts) : {errors: () => {}}
         })
     }
 

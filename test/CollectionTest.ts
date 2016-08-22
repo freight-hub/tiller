@@ -370,8 +370,8 @@ describe('Collection', () => {
         }
 
         let start = new Date().getTime();
-        //await quote.save()
-        await (<any>quote).toDB()
+        await quote.save()
+        //await (<any>quote).toDB()
         //await DB.db.collection('tests').insertOne(quote);
         console.log('Saving: '+(new Date().getTime()-start))
 /*
