@@ -8,8 +8,8 @@ import Bluebird = require("bluebird");
 let assert = require('assert');
 
 // TODO This can be optimized with $lookup and also $in
-export async function populateReference(doc:any, key:string) {
-    if(doc[key]) return;
+export async function populateReference(doc: any, key: string) {
+    if (doc[key]) return;
 
     let docTypeName = doc.constructor.name;
     let referenceSpec = __documents[docTypeName]['references'][key];
@@ -19,7 +19,7 @@ export async function populateReference(doc:any, key:string) {
 
     let D = __documents[docTypeName];
     let orderSpec = __documents[docTypeName]['ordered'] ? __documents[docTypeName]['ordered'][key] : null;
-    if(orderSpec && doc[key]) {
+    if (orderSpec && doc[key]) {
         doc[key] = _.orderBy(doc[key], orderSpec.fields, orderSpec.order);
     }
 }
@@ -33,7 +33,7 @@ export async function populateReference(doc:any, key:string) {
  * @param resolveValue
  * @returns {any}
  */
-async function unwind(targetType, value, resolveValue:(targetType, v:any) => Promise<any>) {
+async function unwind(targetType, value, resolveValue: (targetType, v: any) => Promise<any>) {
     if (!value) {
         return value;
     }
@@ -52,8 +52,7 @@ async function unwind(targetType, value, resolveValue:(targetType, v:any) => Pro
 }
 
 
-
-export async function fromDB<Type extends Collection>(type:Function, doc:any, dontDeserialize?:boolean, resolveLazyReferences?:(boolean | Array<string>)):Promise<Type> {
+export async function fromDB<Type extends Collection>(type: Function, doc: any, dontDeserialize?: boolean, resolveLazyReferences?: (boolean | Array<string>)): Promise<Type> {
     if (!doc) {
         return doc;
     }
@@ -66,29 +65,28 @@ export async function fromDB<Type extends Collection>(type:Function, doc:any, do
     }
     Object.setPrototypeOf(doc, type.prototype);
 
-    let keys = Object.keys(doc);
+    let keys = Object.keys(__documents[typeName]['references']);
     for (var i = 0; i < keys.length; i++) {
-        let key = keys[i].replace(/\_id$/, '');
+        let key = keys[i];
+        let referenceOptions = __documents[typeName]['references'][key];
 
-        if (__documents[typeName]['references'][key]) {
-            let referenceOptions = __documents[typeName]['references'][key];
-
-            if (!referenceOptions.lazy || resolveLazyReferences === true || (isArray(resolveLazyReferences) && ~(<Array<string>>resolveLazyReferences).indexOf(key))) {
-                await populateReference(doc, key);
-            }
-        } else if (__documents[typeName]['embeds'][key]) {
-            let embeddedType = __documents[typeName]['embeds'][key];
-
-            doc[key] = await unwind(embeddedType, doc[key], (targetType, value) => {
-                return fromDB<any>(targetType, value)
-            });
+        if (!referenceOptions.lazy || resolveLazyReferences === true || (isArray(resolveLazyReferences) && ~(<Array<string>>resolveLazyReferences).indexOf(key))) {
+            await populateReference(doc, key);
         }
+    }
+
+    keys = Object.keys(__documents[typeName]['embeds']);
+    for (var i = 0; i < keys.length; i++) {
+        let key = keys[i];
+        let embeddedType = __documents[typeName]['embeds'][key];
+
+        doc[key] = await unwind(embeddedType, doc[key], (targetType, value) => fromDB<any>(targetType, value));
     }
 
     return doc;
 }
 
-export function setupDocument(type:Function) {
+export function setupDocument(type: Function) {
     if (!type.name) {
         throw new Error('Type ' + type + ' cannot be resolved ');
     }

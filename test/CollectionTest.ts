@@ -374,7 +374,7 @@ describe('Collection', () => {
         //await (<any>quote).toDB()
         //await DB.db.collection('tests').insertOne(quote);
         console.log('Saving: '+(new Date().getTime()-start))
-/*
+
         let t = 0;
         for(let i=0; i<5; i++) {
             let start = new Date().getTime();
@@ -386,6 +386,6 @@ describe('Collection', () => {
         }
         t /= 5;
 
-        console.log('Loading 5 times: '+t)*/
+        console.log('Loading 5 times: '+t)
     })
 })

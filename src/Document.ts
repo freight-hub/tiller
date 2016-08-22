@@ -7,15 +7,11 @@ let assert = require('assert');
 
 async function mapObjectHierarchy(obj, processScalar:(obj:any) => Promise<any>) {
     if(obj && isArray(obj)) {
-        /*return Bluebird.map(obj, async function(el) {
-            return mapObjectHierarchy(el, processScalar);
-        })*/
-
-        let a = [];
+        let mapped = [];
         for(let i=0; i<obj.length; i++) {
-            await mapObjectHierarchy(obj[i], processScalar);
+            mapped.push(await mapObjectHierarchy(obj[i], processScalar));
         }
-        return a;
+        return mapped;
     } else {
         return processScalar(obj);
     }
