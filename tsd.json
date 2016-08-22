@@ -22,6 +22,9 @@
     },
     "mocha/mocha.d.ts": {
       "commit": "e1ba8156f25009d5a616d7dc12dd25b08ec05fc8"
+    },
+    "bluebird/bluebird.d.ts": {
+      "commit": "e22f1e32bce0cbcec0c098e9dcdc18c2c84fdb9f"
     }
   }
 }

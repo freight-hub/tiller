@@ -1,9 +1,10 @@
 import {Collection} from "./Collection";
-import {isArray, pmap} from "./common/array";
+import {isArray} from "./common/array";
 import {Document} from "./Document";
 import {DB} from "./DB";
 import {EventEmitter} from "events";
 import * as _ from 'lodash';
+import Bluebird = require("bluebird");
 let assert = require('assert');
 
 // TODO This can be optimized with $lookup and also $in
@@ -42,7 +43,7 @@ async function unwind(targetType, value, resolveValue:(targetType, v:any) => Pro
             throw new Error('Expecting array, got: ' + value.constructor);
         }
 
-        return await pmap(value, async function (v, i) {
+        return await Bluebird.map(value, async function (v, i) {
             return await unwind(targetType[0], v, resolveValue)
         })
     } else {

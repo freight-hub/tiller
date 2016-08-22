@@ -1,16 +1,23 @@
 import {__documents, populateReference, fromDB} from "./core";
-import {isArray, pmap} from "./common/array";
+import {isArray} from "./common/array";
 import {Collection} from "./Collection";
 import {ValidateOptions, ValidationResult, validateDocument} from "./decorators/validate";
+import Bluebird = require("bluebird");
 let assert = require('assert');
 
 async function mapObjectHierarchy(obj, processScalar:(obj:any) => Promise<any>) {
     if(obj && isArray(obj)) {
-        return await pmap(obj, async function(el) {
-            return await mapObjectHierarchy(el, processScalar);
-        })
+        /*return Bluebird.map(obj, async function(el) {
+            return mapObjectHierarchy(el, processScalar);
+        })*/
+
+        let a = [];
+        for(let i=0; i<obj.length; i++) {
+            await mapObjectHierarchy(obj[i], processScalar);
+        }
+        return a;
     } else {
-        return await processScalar(obj);
+        return processScalar(obj);
     }
 }
 
@@ -57,7 +64,7 @@ export class Document {
             // this[key] holds embedded documents
             else if (__document['embeds'][key]) {
                 //copy[key] = await Promise.all(this[key].map((v:Document) => v ? v.toDB(saveDeep) : v));
-                copy[key] = await mapObjectHierarchy(this[key], async (obj) => obj ? await obj.toDB(saveDeep) : obj);
+                copy[key] = await mapObjectHierarchy(this[key], async (obj) => obj ? obj.toDB(saveDeep) : obj);
             }
 
             else {

@@ -1,10 +1,10 @@
 import {DB} from "./DB";
-import {pmap} from "./common/array";
 import {fromDB} from "./core";
 import {Document} from "./Document";
 import * as mongodb from 'mongodb';
 import {InsertOneWriteOpResult} from "mongodb";
 import {ValidationError} from "./decorators/validate";
+import * as Bluebird from 'bluebird';
 
 export abstract class Collection extends Document {
     _id:any
@@ -62,7 +62,7 @@ export abstract class Collection extends Document {
             cursor = cursor.sort(sort);
         }
         let docs = await cursor.toArray();
-        return pmap<any, Type>(docs, async (doc) => {
+        return Bluebird.map<any, Type>(docs, async (doc) => {
             doc = await fromDB(type, doc);
             doc.__isSaved = true;
             return doc;
