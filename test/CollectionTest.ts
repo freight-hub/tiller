@@ -1,13 +1,15 @@
 import {expect} from 'chai'
 import {User, Folder, Backups, File, Foo, Bundle, Item, Bar, House, Door} from "./models";
+import {Quote, Option, LineItem, Product} from "./models/Quote";
 import {includeHelper} from './helper'
 import {DB} from '../src/DB';
-import {Collection,collection} from '../src/index';
+import {Collection, collection} from '../src/index';
 import {ValidationError} from '../src/decorators/validate';
+import {EUR} from "./models/Currency";
 
 describe('Collection', () => {
     includeHelper();
-    
+
     describe('#toDb()', () => {
         it('projects embedded and referenced documents', async() => {
             let bob = new User('bob');
@@ -26,7 +28,7 @@ describe('Collection', () => {
     })
 
     describe('#create', () => {
-        it('created object hierarchies from objecta', async () => {
+        it('created object hierarchies from objecta', async() => {
             let house = await House.create<House>({
                 name: 'foo',
                 doors: [{
@@ -41,10 +43,10 @@ describe('Collection', () => {
     });
 
     describe('#save()', () => {
-        it('can save a model with a string id', async () => {
+        it('can save a model with a string id', async() => {
             @collection('coll1')
             class StringIdColl extends Collection {
-                _id:string
+                _id: string
             }
 
             let obj = new StringIdColl();
@@ -94,21 +96,22 @@ describe('Collection', () => {
                 // because the key already exists
                 await new Bar(1).save();
                 expect.fail()
-            } catch(e) {}
+            } catch (e) {
+            }
         })
 
-        it('raises a ValidationError the object is invalid', async () => {
+        it('raises a ValidationError the object is invalid', async() => {
             try {
                 await new House().save();
                 expect.fail()
-            } catch(e) {
+            } catch (e) {
                 expect(e).to.be.an.instanceOf(ValidationError)
             }
         })
     })
 
     describe('#save(..., true)', () => {
-        it('upserts existing documents', async () => {
+        it('upserts existing documents', async() => {
             let house = new House('My House 1');
             await house.save();
 
@@ -121,7 +124,7 @@ describe('Collection', () => {
             expect(_house.color).to.eq('red');
         })
 
-        it('totally replaces objects when upserting', async () => {
+        it('totally replaces objects when upserting', async() => {
             let house = new House('My House 1');
             house.color = 'red';
             await house.save();
@@ -143,7 +146,7 @@ describe('Collection', () => {
     })
 
     describe('#get()', () => {
-        it('returns a document if it exists', async () => {
+        it('returns a document if it exists', async() => {
             var folder = new Folder('myfolder');
             await folder.save();
 
@@ -161,7 +164,7 @@ describe('Collection', () => {
             expect(folder_).to.be.an.instanceOf(Folder);
         })
 
-        it('returns undefined if a document doesn exist', async () => {
+        it('returns undefined if a document doesn exist', async() => {
             let folder_ = await Folder.get<Folder>('ABC')
 
             expect(folder_).to.be.undefined;
@@ -261,7 +264,7 @@ describe('Collection', () => {
     });
 
     describe('#all()', () => {
-        it('returns all documents', async () => {
+        it('returns all documents', async() => {
             await new User('bob').save();
             await new User('anne').save();
             await new User('judith').save();
@@ -275,7 +278,7 @@ describe('Collection', () => {
     })
 
     describe('#count()', () => {
-        it('returns the count of documents', async () => {
+        it('returns the count of documents', async() => {
             await new User('bob').save();
             await new User('anne').save();
             await new User('judith').save();
@@ -286,8 +289,8 @@ describe('Collection', () => {
         })
     })
 
-    describe('#destroy', async () => {
-        it('destroy the instance of an object', async () => {
+    describe('#destroy', async() => {
+        it('destroy the instance of an object', async() => {
             let bob = await new User('bob').save();
             expect(await User.count()).to.eq(1);
             await bob.destroy();
@@ -296,24 +299,24 @@ describe('Collection', () => {
     })
 
     describe('#updateProperties', () => {
-        it('updates scalar properties of unsaved models', async () => {
+        it('updates scalar properties of unsaved models', async() => {
             let file = new File('name1');
             await file.updateProperties({name: 'name2'})
             expect(file.name).to.eq('name2');
         })
 
-        it('updates scalar properties of saved models', async () => {
+        it('updates scalar properties of saved models', async() => {
             let file = await new File('name1').save();
             await file.updateProperties({name: 'name2'})
             await file.save();
 
             file = await File.get<File>(file._id);
             expect(file.name).to.eq('name2');
-            
-            
+
+
         })
 
-        it('updates referenced documents of saved models', async () => {
+        it('updates referenced documents of saved models', async() => {
             let user = await new User('anna').save();
             let file = await new File('name1').save();
             await file.updateProperties({owner_id: user._id})
@@ -346,5 +349,43 @@ describe('Collection', () => {
         expect(root_.backups.backup1.name).to.eq(root.backups.backup1.name);
         expect(root_.backups.count()).to.eq(root.backups.count());
         expect(root_.backups.backup1.owner.id).to.eq(root.backups.backup1.owner.id);
+    })
+
+    it('loads huge documents fast', async function () {
+        this.timeout(60 * 1000)
+
+        let quote = new Quote();
+        quote.options = [];
+        for (let i = 0; i < 400; i++) {
+            let option = new Option();
+            option.product = new Product('Product ' + i, 'PRODUCT-' + i);
+            option.lineItems = [];
+            for (let j = 0; j < 15; j++) {
+                let lineItem = new LineItem();
+                lineItem.name = 'Line Item ' + j;
+                lineItem.total = EUR(j * 100);
+                option.lineItems.push(lineItem);
+            }
+            quote.options.push(option);
+        }
+
+        let start = new Date().getTime();
+        //await quote.save()
+        await (<any>quote).toDB()
+        //await DB.db.collection('tests').insertOne(quote);
+        console.log('Saving: '+(new Date().getTime()-start))
+/*
+        let t = 0;
+        for(let i=0; i<5; i++) {
+            let start = new Date().getTime();
+
+            quote = await Quote.get<Quote>(quote._id);
+
+            let end = new Date().getTime();
+            t += end-start;
+        }
+        t /= 5;
+
+        console.log('Loading 5 times: '+t)*/
     })
 })

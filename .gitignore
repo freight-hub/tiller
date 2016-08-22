@@ -73,3 +73,4 @@ test/**/*.d.ts
 .vscode/*
 !.vscode/tasks.json
 ~*.docx
+*-v8.log
