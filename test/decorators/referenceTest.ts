@@ -102,6 +102,14 @@ describe('@reference decorator', () => {
         expect(ship_.bundles[1].id).eq(2)
     })
 
+    it('does not set referenced properties to null or undefined, if they are not set in the database', async () => {
+        let folder = new Folder('root')
+        await folder.save();
+
+        let _folder = await Folder.get<Folder>(folder._id);
+        expect(Object.keys(_folder).filter(k => k == 'owner').length).to.eq(0);
+    })
+
     describe('with a lazy reference', () => {
         it('saves references to referenced documents', async () => {
             let b = await new B('My B').save();

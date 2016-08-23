@@ -68,6 +68,8 @@ export async function fromDB<Type extends Collection>(type: Function, doc: any, 
     let keys = Object.keys(__documents[typeName]['references']);
     for (var i = 0; i < keys.length; i++) {
         let key = keys[i];
+        if(doc[key] === undefined) continue;
+
         let referenceOptions = __documents[typeName]['references'][key];
 
         if (!referenceOptions.lazy || resolveLazyReferences === true || (isArray(resolveLazyReferences) && ~(<Array<string>>resolveLazyReferences).indexOf(key))) {
@@ -78,6 +80,8 @@ export async function fromDB<Type extends Collection>(type: Function, doc: any, 
     keys = Object.keys(__documents[typeName]['embeds']);
     for (var i = 0; i < keys.length; i++) {
         let key = keys[i];
+        if(doc[key] === undefined) continue;
+
         let embeddedType = __documents[typeName]['embeds'][key];
 
         doc[key] = await unwind(embeddedType, doc[key], (targetType, value) => fromDB<any>(targetType, value));

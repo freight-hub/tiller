@@ -74,8 +74,8 @@ export class Folder extends Collection {
 
     constructor(name?:string, owner?:User) {
         super();
-        this.name = name;
-        this.owner = owner;
+        if(name) this.name = name;
+        if(owner) this.owner = owner;
     }
 
     path() {
