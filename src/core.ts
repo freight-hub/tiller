@@ -68,7 +68,7 @@ export async function fromDB<Type extends Collection>(type: Function, doc: any, 
     let keys = Object.keys(__documents[typeName]['references']);
     for (var i = 0; i < keys.length; i++) {
         let key = keys[i];
-        if(doc[key] === undefined) continue;
+        if(doc[key] === undefined && doc[key+'_id'] === undefined) continue;
 
         let referenceOptions = __documents[typeName]['references'][key];
 
