@@ -1,6 +1,6 @@
 {
   "name": "tiller",
-  "version": "0.1.40",
+  "version": "0.1.31",
   "description": "MongoDB ODM for TypeScript",
   "keywords": [
     "mongodb",
