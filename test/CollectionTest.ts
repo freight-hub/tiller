@@ -108,6 +108,15 @@ describe('Collection', () => {
                 expect(e).to.be.an.instanceOf(ValidationError)
             }
         })
+
+        it('sets property_id of references on save', async() => {
+            let user = await new User('anna').save();
+            let file = await new File('name1');
+            file.owner = user;
+            await file.save();
+
+            expect(file.owner_id.toString()).to.eq(user._id.toString());
+        })
     })
 
     describe('#save(..., true)', () => {

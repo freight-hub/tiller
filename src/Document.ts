@@ -44,16 +44,19 @@ export class Document {
                     await this[key].save(saveDeep);
                 }
                 copy[key + '_id'] = this[key]._id;
+                this[key + '_id'] = this[key]._id;
             }
 
             // this[key] is an array, holding referenced documents
             else if (isArray(this[key]) && __document['references'][key]) {
                 copy[key + '_id'] = [];
+                this[key + '_id'] = [];
                 for (var v of this[key]) {
                     if (saveDeep && v.isNew()) {
                         await v.save(saveDeep)
                     }
                     copy[key + '_id'].push(v ? v._id : null);
+                    this[key + '_id'].push(v ? v._id : null);
                 }
             }
 

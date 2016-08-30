@@ -6,6 +6,7 @@ import {embed} from "../src/decorators/embed";
 import {ordered} from "../src/decorators/ordered";
 import {validate, validateDocument, ValidationResult} from "../src/decorators/validate";
 import {index} from "../src/decorators/index";
+import {ObjectID} from 'mongodb';
 
 @collection()
 export class User extends Collection {
@@ -27,9 +28,11 @@ export class File extends Collection {
 
     @reference(User)
     owner:User
+    owner_id: ObjectID;
 
     @reference([User])
     editors:Array<User>
+    editors_id: ObjectID[];
     
     constructor(name:string, owner?:User) {
         super();
