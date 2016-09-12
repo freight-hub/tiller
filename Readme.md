@@ -241,6 +241,7 @@ also recreate embedded and referenced documents.
 * Complete Readme: References, Embedded Documents
 * Keep upward references in @document
 * Implement $lookup aggregation for fast loading of references
+* Implement support for aggregation queries
 
 ## Bugs
 * Arrays of Referenced Objects are supported, but not arrays of arrays of referenced objects
