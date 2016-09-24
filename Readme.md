@@ -242,6 +242,7 @@ also recreate embedded and referenced documents.
 * Keep upward references in @document
 * Implement $lookup aggregation for fast loading of references
 * Implement support for aggregation queries
+* Support Model-level hooks, to support external service-based model validation, i.e. MyModel.addHook('afterSave', ...)
 
 ## Bugs
 * Arrays of Referenced Objects are supported, but not arrays of arrays of referenced objects
