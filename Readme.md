@@ -19,6 +19,7 @@ Make sure that you compile to ES6 JavaScript.
 
 ## Getting Started
 
+```js
     import 'source-map-support/register'
     import {DB, Document, collection, Collection, document, embed} from 'tiller';
 
@@ -65,6 +66,7 @@ Make sure that you compile to ES6 JavaScript.
     })().catch((e) => {
         console.error(e.stack)
     })
+```
 
 ## Manual
 ### Creating Collections
