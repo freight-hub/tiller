@@ -55,11 +55,11 @@ export abstract class Collection extends Document {
         let type = this.__type || (this._collectionName ? this : null);
         let coll = await DB.collection((<any>type)._collectionName);
         let cursor = coll.find(selector);
-        if (typeof(limit) == 'number') {
-            cursor = cursor.limit(limit);
-        }
         if (sort) {
             cursor = cursor.sort(sort);
+        }
+        if (typeof(limit) == 'number') {
+            cursor = cursor.limit(limit);
         }
         let docs = await cursor.toArray();
         return Bluebird.map<any, Type>(docs, async (doc) => {
