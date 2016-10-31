@@ -248,6 +248,7 @@ also recreate embedded and referenced documents.
 * Add chai plugins: expect(myModel).to.be.valid/invalid
 * Use mongodb connection string to connect
 * Subclassing
+* Support aggregation 
 
 ## Bugs
 * Arrays of Referenced Objects are supported, but not arrays of arrays of referenced objects
