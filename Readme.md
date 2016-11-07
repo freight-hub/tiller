@@ -249,6 +249,7 @@ also recreate embedded and referenced documents.
 * Use mongodb connection string to connect
 * Subclassing
 * Support aggregation 
+* Audits (async, bg)
 
 ## Bugs
 * Arrays of Referenced Objects are supported, but not arrays of arrays of referenced objects
