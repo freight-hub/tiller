@@ -250,6 +250,7 @@ also recreate embedded and referenced documents.
 * Subclassing
 * Support aggregation 
 * Audits (async, bg)
+* Inverse Reference
 
 ## Bugs
 * Arrays of Referenced Objects are supported, but not arrays of arrays of referenced objects
