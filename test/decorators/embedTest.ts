@@ -86,6 +86,12 @@ describe('@embed decorator', () => {
     it('can handle transitive cyclic imports', async () => {
         let b = new BB2();
         b.aa = new AA()
+        b.aas = [new AA(), new AA()]
         await b.save()
+
+        b = await BB2.get(b._id)
+        expect(b.aa).to.be.instanceof(AA)
+        expect(b.aas[0]).to.be.instanceof(AA)
+        expect(b.aas[1]).to.be.instanceof(AA)
     })
 })
