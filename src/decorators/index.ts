@@ -30,7 +30,7 @@ export async function createIndexes() {
 
         let embeds = __documents[typeName]['embeds'];
         for (var prop in embeds) {
-            paths = paths.concat(it(unwindType(embeds[prop]).name, (path ? path + '.' : '') + prop));
+            paths = paths.concat(it(unwindType(embeds[prop]()).name, (path ? path + '.' : '') + prop));
         }
         return paths;
     }

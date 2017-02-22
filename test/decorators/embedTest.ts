@@ -3,6 +3,8 @@ import {Folder, User, Backups, File, Bundle, SpaceShip, Item, Loc, A4, B} from "
 import {includeHelper} from '../helper'
 import {DB} from "../../src/DB";
 import {embed} from "../../src/decorators/embed";
+import {AA} from "../models/AA";
+import {BB2} from "../models/BB2";
 
 describe('@embed decorator', () => {
     includeHelper();
@@ -79,5 +81,11 @@ describe('@embed decorator', () => {
         } catch(e) {
             expect(e.message).to.eq('Type of @embeds decorator at Function:someUndefinedEmbeds is undefined')
         }
+    })
+
+    it('can handle transitive cyclic imports', async () => {
+        let b = new BB2();
+        b.aa = new AA()
+        await b.save()
     })
 })

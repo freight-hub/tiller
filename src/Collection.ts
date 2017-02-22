@@ -2,7 +2,7 @@ import {DB} from "./DB";
 import {fromDB} from "./core";
 import {Document} from "./Document";
 import * as mongodb from 'mongodb';
-import {InsertOneWriteOpResult} from "mongodb";
+import {InsertOneWriteOpResult} from  "mongodb";
 import {ValidationError} from "./decorators/validate";
 import * as Bluebird from 'bluebird';
 

@@ -82,7 +82,7 @@ export async function fromDB<Type extends Collection>(type: Function, doc: any, 
         let key = keys[i];
         if(doc[key] === undefined) continue;
 
-        let embeddedType = __documents[typeName]['embeds'][key];
+        let embeddedType = __documents[typeName]['embeds'][key]();
 
         doc[key] = await unwind(embeddedType, doc[key], (targetType, value) => fromDB<any>(targetType, value));
     }
