@@ -1,4 +1,4 @@
- {
+{
   "name": "tiller",
   "version": "0.1.34",
   "description": "MongoDB ODM for TypeScript",
@@ -33,7 +33,7 @@
     "bluebird": "^3.4.1",
     "js-schema": "^1.0.1",
     "lodash": "^4.11.1",
-    "mongodb": "^2.1.16",
+    "mongodb": "^2.2.24",
     "source-map-support": "^0.4.0"
   },
   "devDependencies": {
