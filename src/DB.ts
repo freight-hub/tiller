@@ -8,7 +8,7 @@ export class _DB extends EventEmitter {
 
     async connect(uri:string, user?:string, password?:string) {
         if (!this.db) {
-            let options:MongoClientOptions = {server: {socketOptions: {autoReconnect: true}}};
+            let options:MongoClientOptions = {autoReconnect: true};
             this.db = await MongoClient.connect(uri, options)
             if(user && password) {
                 await this.db.authenticate(user, password)
