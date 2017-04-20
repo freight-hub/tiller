@@ -270,6 +270,20 @@ describe('Collection', () => {
             expect(await User.find<User>({}, null, {id: 1})).to.have.length(3);
             expect(await User.find<User>({}, 1, {id: 1})).to.have.length(1);
         })
+
+        it('applies sorts before limits', async() => {
+            let lucy = await new User('lucy').save();
+            let alice = await new User('alice').save();
+            let bob = await new User('bob').save();
+
+            let users = await User.find<User>({}, 1, {id: 1});
+            expect(users).to.have.length(1);
+            expect(users[0].id).to.eqls('alice');
+
+            users = await User.find<User>({}, 2, {id: -1});
+            expect(users).to.have.length(2);
+            expect(users.map(u => u.id)).to.eqls(['lucy', 'bob']);
+        })
     });
 
     describe('#all()', () => {
