@@ -12,7 +12,6 @@ export class _DB extends EventEmitter {
             let options: MongoClientOptions = { autoReconnect: true, ...(user && password ? { auth: { user, password } } : {}) };
             this.mongoClient = await MongoClient.connect(uri, options)
             this.db = this.mongoClient.db()
-
             await createIndexes()
         }
     }
