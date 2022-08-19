@@ -1,8 +1,6 @@
 import { __documents, populateReference, fromDB } from "./core";
 import { isArray } from "./common/array";
-import {
-  validateDocument,
-} from "./decorators/validate";
+import { validateDocument } from "./decorators/validate";
 
 async function mapObjectHierarchy(
   obj,
