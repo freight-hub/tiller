@@ -1,9 +1,8 @@
-import {Collection} from "../../src/Collection";
-import {collection} from "../../src/decorators/collection";
-import {embed} from "../../src/decorators/embed";
-import {reference} from "../../src/decorators/reference";
-import {document} from "../../src/decorators/document";
-import {validate} from "../../src/decorators/validate";
+import {Collection} from "../../src";
+import {collection} from "../../src";
+import {embed} from "../../src";
+import {reference} from "../../src";
+import {document} from "../../src";
 import {Currency} from "./Currency";
 
 @document()

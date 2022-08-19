@@ -1,7 +1,7 @@
 import {expect} from 'chai'
 import {Folder, User, Backups, File, Bundle, SpaceShip, A, B} from "../models";
 import {includeHelper} from '../helper'
-import {DB} from "../../src/DB";
+import {DB} from "../../src";
 import {AA} from "../models/AA";
 import {BB} from "../models/BB";
 

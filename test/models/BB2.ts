@@ -1,6 +1,6 @@
-import {Collection} from "../../src/Collection";
-import {collection} from "../../src/decorators/collection";
-import {embed} from "../../src/decorators/embed";
+import {Collection} from "../../src";
+import {collection} from "../../src";
+import {embed} from "../../src";
 import {AA} from "./AA";
 
 @collection()

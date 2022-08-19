@@ -1,8 +1,7 @@
 import {expect} from 'chai'
 import {Folder, WeirdCollectionClazz} from "../models";
 import {includeHelper} from '../helper'
-import {DB} from "../../src/DB";
-import {collection, Collection} from "../../src/index";
+import {DB} from "../../src";
 
 describe('@collection decorator', () => {
     includeHelper();

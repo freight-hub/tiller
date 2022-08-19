@@ -1,17 +1,17 @@
-import {DB} from "../src/DB";
-let DatabaseCleaner = require('database-cleaner');
-import * as fs from 'fs'
+import {DB} from "../src";
 
-export function cleanDatabase() {
+let DatabaseCleaner = require('database-cleaner');
+
+export function cleanDatabase(): Promise<void> {
     var databaseCleaner = new DatabaseCleaner('mongodb');
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
         databaseCleaner.clean(DB.db, () => {
             resolve();
         })
     });
 }
 
-export function includeHelper(cleanBeforeEach?:boolean) {
+export function includeHelper(cleanBeforeEach?: boolean) {
     cleanBeforeEach = cleanBeforeEach == undefined ? true : false;
 
     async function connect() {
@@ -26,30 +26,20 @@ export function includeHelper(cleanBeforeEach?:boolean) {
 
     }
 
-    before(async () => {
+    beforeAll(async () => {
         await connect();
     })
 
     beforeEach(async () => {
-        if(cleanBeforeEach) {
+        if (cleanBeforeEach) {
             await cleanDatabase();
         }
         await seedDatabase();
     })
 
-    after(async () => {
-        if(!cleanBeforeEach) {
+    afterEach(async () => {
+        if (!cleanBeforeEach) {
             await cleanDatabase();
         }
     })
-}
-
-export function _async(fn:() => Promise<any>):((MochaDone) => Promise<any>) {
-    return (done:MochaDone) => {
-        return fn().then(function() {
-            done();
-        }, function(e) {
-            done(e);
-        });
-    }
 }

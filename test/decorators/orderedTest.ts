@@ -1,7 +1,6 @@
 import {expect} from 'chai'
-import {Folder, User, Backups, File, Bundle, SpaceShip, Item, Loc} from "../models";
+import {Folder, File} from "../models";
 import {includeHelper} from '../helper'
-import {DB} from "../../src/DB";
 import * as _ from 'lodash';
 
 describe('@ordered decorator', () => {

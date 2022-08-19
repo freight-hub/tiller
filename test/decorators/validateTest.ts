@@ -1,9 +1,7 @@
 import {expect} from 'chai'
-import {Folder, User, Backups, File, Bundle, SpaceShip, Item, Loc, House, Door, A, B, A2, A4, B1} from "../models";
+import {House, Door, B, A2, A4, B1} from "../models";
 import {includeHelper} from '../helper'
-import {DB} from "../../src/DB";
-import {ValidationResult} from "../../src/decorators/validate";
-import {Document} from "../../src/Document";
+import {ValidationResult} from "../../src";
 
 describe('@validate decorator', () => {
     includeHelper();

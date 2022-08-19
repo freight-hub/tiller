@@ -2,9 +2,9 @@ import {expect} from 'chai'
 import {User, Folder, Backups, File, Foo, Bundle, Item, Bar, House, Door} from "./models";
 import {Quote, Option, LineItem, Product} from "./models/Quote";
 import {includeHelper} from './helper'
-import {DB} from '../src/DB';
-import {Collection, collection} from '../src/index';
-import {ValidationError} from '../src/decorators/validate';
+import {DB} from '../src';
+import {Collection, collection} from '../src';
+import {ValidationError} from '../src';
 import {EUR} from "./models/Currency";
 
 describe('Collection', () => {

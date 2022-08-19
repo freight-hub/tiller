@@ -1,10 +1,10 @@
 import {includeHelper} from "./helper";
-import {collection} from "../src/decorators/collection";
-import {document} from "../src/decorators/document";
-import {Collection} from "../src/Collection";
-import {Document} from "../src/Document";
-import {DB} from "../src/DB";
-import {embed} from "../src/decorators/embed";
+import {collection} from "../src";
+import {document} from "../src";
+import {Collection} from "../src";
+import {Document} from "../src";
+import {DB} from "../src";
+import {embed} from "../src";
 import {expect} from 'chai'
 
 describe('Document', () => {

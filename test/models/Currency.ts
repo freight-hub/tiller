@@ -1,4 +1,4 @@
-import {document} from "../../src/decorators/document";
+import {document} from "../../src";
 
 @document()
 export class Currency {

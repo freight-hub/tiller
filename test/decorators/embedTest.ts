@@ -1,8 +1,8 @@
 import {expect} from 'chai'
-import {Folder, User, Backups, File, Bundle, SpaceShip, Item, Loc, A4, B} from "../models";
+import {Folder, User, Backups, File, Bundle, Item, Loc, A4, B} from "../models";
 import {includeHelper} from '../helper'
-import {DB} from "../../src/DB";
-import {embed} from "../../src/decorators/embed";
+import {DB} from "../../src";
+import {embed} from "../../src";
 import {AA} from "../models/AA";
 import {BB2} from "../models/BB2";
 

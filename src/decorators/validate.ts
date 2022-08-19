@@ -1,134 +1,151 @@
-import {setupDocument, __documents} from "../core";
-import {Document} from "../Document";
-import {isArray} from "../common/array";
-import Bluebird = require("bluebird");
-let schema = require('js-schema');
+import { setupDocument, __documents } from "../core";
+import { isArray } from "../common/array";
+let schema = require("js-schema");
 
-export function validate(options:ValidateOptions):any {
-    return function (target:any, propertyKey:string, descriptor:TypedPropertyDescriptor<any>) {
-        if (!options) {
-            throw new Error('Options of @validate decorator at ' + target.constructor.name + ':' + propertyKey + ' are undefined');
-        }
+export function validate(options: ValidateOptions): any {
+  return function (
+    target: any,
+    propertyKey: string,
+    descriptor: TypedPropertyDescriptor<any>
+  ) {
+    if (!options) {
+      throw new Error(
+        "Options of @validate decorator at " +
+          target.constructor.name +
+          ":" +
+          propertyKey +
+          " are undefined"
+      );
+    }
 
-        setupDocument(target.constructor);
+    setupDocument(target.constructor);
 
-        __documents[target.constructor.name]['validate'][propertyKey] = options;
-    };
+    __documents[target.constructor.name]["validate"][propertyKey] = options;
+  };
 }
 
-export async function validateDocument(doc:any):Promise<ValidationResult> {
-    async function validateEmbedded(v:ValidationResult, doc) {
-        if (!doc) return;
-        if (!isArray(doc)) {
-            let embedValidation = await doc.validate();
-            v.addErrors(embedValidation.errors, prop);
-        } else {
-            for (var el of doc) {
-                if (el) {
-                    let embedValidation = await validateEmbedded(v, el);
-                }
-            }
+export async function validateDocument(doc: any): Promise<ValidationResult> {
+  async function validateEmbedded(v: ValidationResult, doc) {
+    if (!doc) return;
+    if (!isArray(doc)) {
+      let embedValidation = await doc.validate();
+      v.addErrors(embedValidation.errors, prop);
+    } else {
+      for (var el of doc) {
+        if (el) {
+          let embedValidation = await validateEmbedded(v, el);
         }
+      }
     }
+  }
 
-    if (typeof(doc.beforeValidation) == 'function') {
-        await doc.beforeValidation();
+  if (typeof doc.beforeValidation == "function") {
+    await doc.beforeValidation();
+  }
+
+  let v = new ValidationResult();
+
+  let embeds = __documents[doc.constructor.name]["embeds"];
+  for (var prop of Object.getOwnPropertyNames(embeds)) {
+    await validateEmbedded(v, doc[prop]);
+  }
+
+  let validate = __documents[doc.constructor.name]["validate"];
+  let references = __documents[doc.constructor.name]["references"];
+
+  if (!doc.__schema) {
+    var schemaOpts = {};
+    Object.getOwnPropertyNames(validate).forEach((p) => {
+      let validateOptions: ValidateOptions = validate[p];
+      if (validateOptions.required && !validateOptions.type) {
+        schemaOpts[p] = undefined;
+      } else if (validateOptions.required && validateOptions.type) {
+        schemaOpts[p] = validateOptions.type;
+      } else if (!validateOptions.required && !validateOptions.type) {
+      } else if (!validateOptions.required && validateOptions.type) {
+        schemaOpts["?" + p] = [validateOptions.type];
+      }
+    });
+    Object.defineProperty(doc, "__schema", {
+      enumerable: false,
+      value:
+        Object.keys(schemaOpts).length > 0
+          ? schema(schemaOpts)
+          : { errors: () => {} },
+    });
+  }
+
+  let requiredLazyRefProps = Object.keys(validate)
+    .map((prop) => {
+      return {
+        prop: prop,
+        validate: validate[prop],
+        reference: references[prop],
+      };
+    })
+    .filter((v) => v.validate.required && v.reference && v.reference.lazy);
+
+  for (var requiredLazyRefProp of requiredLazyRefProps) {
+    if (
+      !doc[requiredLazyRefProp.prop] &&
+      doc[requiredLazyRefProp.prop + "_id"]
+    ) {
+      await doc.loadReference(requiredLazyRefProp.prop);
     }
+  }
 
-    let v = new ValidationResult();
-
-    let embeds = __documents[doc.constructor.name]['embeds'];
-    for (var prop of Object.getOwnPropertyNames(embeds)) {
-        await validateEmbedded(v, doc[prop]);
+  let errors = doc.__schema.errors(doc) || {};
+  for (var propertyName of Object.getOwnPropertyNames(errors)) {
+    if (errors[propertyName].constructor == Array) {
+      errors[propertyName].forEach((e) => v.add(propertyName, e));
+    } else {
+      v.add(propertyName, errors[propertyName]);
     }
+  }
 
-    let validate = __documents[doc.constructor.name]['validate'];
-    let references = __documents[doc.constructor.name]['references'];
-
-    if (!doc.__schema) {
-        var schemaOpts = {};
-        Object.getOwnPropertyNames(validate).forEach(p => {
-            let validateOptions:ValidateOptions = validate[p];
-            if (validateOptions.required && !validateOptions.type) {
-                schemaOpts[p] = undefined;
-            } else if (validateOptions.required && validateOptions.type) {
-                schemaOpts[p] = validateOptions.type;
-            } else if (!validateOptions.required && !validateOptions.type) {
-
-            } else if (!validateOptions.required && validateOptions.type) {
-                schemaOpts['?' + p] = [validateOptions.type];
-            }
-        })
-        Object.defineProperty(doc, '__schema', {
-            enumerable: false,
-            value: Object.keys(schemaOpts).length > 0 ? schema(schemaOpts) : {errors: () => {}}
-        })
-    }
-
-    let requiredLazyRefProps = Object.keys(validate)
-        .map(prop => {
-            return {prop: prop, validate: validate[prop], reference: references[prop]}
-        })
-        .filter(v => v.validate.required && v.reference && v.reference.lazy);
-
-    for (var requiredLazyRefProp of requiredLazyRefProps) {
-        if (!doc[requiredLazyRefProp.prop] && doc[requiredLazyRefProp.prop + '_id']) {
-            await doc.loadReference(requiredLazyRefProp.prop);
-        }
-    }
-
-    let errors = doc.__schema.errors(doc) || {};
-    for (var propertyName of Object.getOwnPropertyNames(errors)) {
-        if (errors[propertyName].constructor == Array) {
-            errors[propertyName].forEach(e => v.add(propertyName, e))
-        } else {
-            v.add(propertyName, errors[propertyName])
-        }
-    }
-
-    return v;
+  return v;
 }
 
 export interface ValidateOptions {
-    required?:boolean
-    type?:Object // TODO Check that this is one of the ten types supported by js-schema
+  required?: boolean;
+  type?: Object; // TODO Check that this is one of the ten types supported by js-schema
 }
 
 export class ValidationResult {
-    errors:{[property:string]:Array<string>} = {}
+  errors: { [property: string]: Array<string> } = {};
 
-    constructor(errors?) {
-        this.errors = errors || {};
-    }
+  constructor(errors?) {
+    this.errors = errors || {};
+  }
 
-    add(property:string, error:string) {
-        (this.errors[property] || (this.errors[property] = [])).push(error);
-    }
+  add(property: string, error: string) {
+    (this.errors[property] || (this.errors[property] = [])).push(error);
+  }
 
-    addErrors(errors:{[property:string]:Array<string>}, prefix:string) {
-        for (var prop of Object.keys(errors || {})) {
-            errors[prop].forEach(e => this.add(prefix + '.' + prop, e))
-        }
+  addErrors(errors: { [property: string]: Array<string> }, prefix: string) {
+    for (var prop of Object.keys(errors || {})) {
+      errors[prop].forEach((e) => this.add(prefix + "." + prop, e));
     }
+  }
 
-    valid() {
-        return Object.getOwnPropertyNames(this.errors).length == 0;
-    }
+  valid() {
+    return Object.getOwnPropertyNames(this.errors).length == 0;
+  }
 
-    toString() {
-        let str = [];
-        for (var key of Object.keys(this.errors || {})) {
-            str.push(key + ': ' + this.errors[key].join(','));
-        }
-        return str.join('\n');
+  toString() {
+    let str = [];
+    for (var key of Object.keys(this.errors || {})) {
+      str.push(key + ": " + this.errors[key].join(","));
     }
+    return str.join("\n");
+  }
 }
 
 export class ValidationError extends Error {
-    validationResult:ValidationResult
+  validationResult: ValidationResult;
 
-    constructor(message:string, validationResult:ValidationResult) {
-        super(message);
-        this.validationResult = validationResult;
-    }
+  constructor(message: string, validationResult: ValidationResult) {
+    super(message);
+    this.validationResult = validationResult;
+  }
 }

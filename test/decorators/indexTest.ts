@@ -5,7 +5,7 @@ import {DB, _DB} from "../../src/DB";
 
 describe('@index decorator', () => {
 
-    before(async() => {
+    beforeEach(async() => {
         await DB.disconnect(true);
         await DB.connect('mongodb://localhost:27017/tiller_test_indexes');
     })
@@ -20,7 +20,7 @@ describe('@index decorator', () => {
         expect(indexes.filter(i => i.name == '_id_').length).to.eq(1)
     })
 
-    after(async() => {
+    afterEach(async() => {
         await cleanDatabase();
         await DB.disconnect();
     })

@@ -1,12 +1,12 @@
-import {Collection} from "../src/Collection";
-import {reference} from "../src/decorators/reference";
-import {document} from "../src/decorators/document";
-import {collection} from "../src/decorators/collection";
-import {embed} from "../src/decorators/embed";
-import {ordered} from "../src/decorators/ordered";
-import {validate, validateDocument, ValidationResult} from "../src/decorators/validate";
-import {index} from "../src/decorators/index";
-import {ObjectID} from 'mongodb';
+import {Collection} from "../src";
+import {reference} from "../src";
+import {document} from "../src";
+import {collection} from "../src";
+import {embed} from "../src";
+import {ordered} from "../src";
+import {validate, validateDocument, ValidationResult} from "../src";
+import {index} from "../src";
+import {ObjectId} from "mongodb";
 
 @collection()
 export class User extends Collection {
@@ -28,11 +28,11 @@ export class File extends Collection {
 
     @reference(User)
     owner:User
-    owner_id: ObjectID;
+    owner_id: ObjectId;
 
     @reference([User])
     editors:Array<User>
-    editors_id: ObjectID[];
+    editors_id: ObjectId[];
     
     constructor(name:string, owner?:User) {
         super();
